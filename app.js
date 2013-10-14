@@ -4,12 +4,14 @@
  */
 
 var express = require ( "express" );
-var routes = require ( "./routes" );
 var http = require ( "http" );
 var path = require ( "path" );
+var routes = require ( "./routes" );
+var model = require ( "./model" );
 
 var app = express ( );
-var sequelize = require ( "./model" ) ( );
+
+var sequelize = model ( );
 
 // all environments
 app.set ( "port", process.env.PORT || 3000 );

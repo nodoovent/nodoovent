@@ -1,5 +1,5 @@
 var Sequelize = require ( "Sequelize" );
-var conf = require ( "../conf/db" );
+var conf = require ( "../conf" ).db;
 
 
 module.exports = function ( ) {
@@ -45,7 +45,7 @@ module.exports = function ( ) {
 
 	TodosList.belongsTo ( User, {as: "Creator" } );
 
-	// Sync model wit database
+	// Sync nodoovent model with database
 	Comment.sync ( );
 	Group.sync ( );
 	Privacy.sync ( );
@@ -54,6 +54,10 @@ module.exports = function ( ) {
 	Todo.sync ( );
 	TodosList.sync ( );
 	User.sync ( );
+
+
+	var model = { Comment: Comment, Group: Group, Privacy: Privacy, Status: Status,
+					Tag: Tag, Todo: Todo, TodosList: TodosList, User: User };
 
 
 	// Models for oauth
