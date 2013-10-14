@@ -1,3 +1,9 @@
+/*
+ *	Privacy
+ *
+ *	privacy of a todo. Public or Private.
+ */
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {
@@ -5,8 +11,8 @@ module.exports = function ( sequelize ) {
 		"Privacy",
 		{
 			name: {
-				type: Sequelize.ENUM,
-				values: [ "Private", "Public", "With my groups mate" ]
+				type: Sequelize.STRING,
+				allowNull: false
 			}
 		},
 		{
@@ -23,9 +29,3 @@ module.exports = function ( sequelize ) {
 		}
 	);
 }
-
-/*
-	"With my groups mate" 
-	-> for all groups mate 
-		or add level option choose some groups
-*/

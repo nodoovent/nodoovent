@@ -1,3 +1,9 @@
+/*
+ *	Tag
+ *
+ *	Tags for todos
+ */
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {

@@ -1,3 +1,10 @@
+/*
+ *	TodoList
+ *
+ *	List of todos ...
+ */
+
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {

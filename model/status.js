@@ -1,3 +1,10 @@
+/*
+ *	Status
+ *
+ *	the current status of a todo (for example: "In progress").
+ */
+
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {
@@ -6,8 +13,8 @@ module.exports = function ( sequelize ) {
 		"Status",
 		{
 			name: {
-				type: Sequelize.ENUM,
-				values: [ "Terminate", "Open", "In Progress", "Refused" ]
+				type: Sequelize.STRING,
+				allowNull: false
 			}
 		},
 		{

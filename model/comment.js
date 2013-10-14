@@ -1,3 +1,10 @@
+/*
+ *	Comment
+ *
+ *	describe a comment in a Todo.
+ */
+
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {

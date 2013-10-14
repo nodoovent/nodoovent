@@ -1,3 +1,10 @@
+/*
+ *	User
+ *
+ *
+ */
+
+
 var Sequelize = require ( "Sequelize" );
 
 module.exports = function ( sequelize ) {
