@@ -2,7 +2,7 @@ var Sequelize = require ( "Sequelize" );
 var conf = require ( "../conf" ).db;
 
 
-module.exports = function ( ) {
+module.exports.init = function ( ) {
 
 	var dbengine = conf[conf.dbengine];
 	var sequelize = new Sequelize ( dbengine.database, dbengine.username, dbengine.password, dbengine.conf );
@@ -55,11 +55,14 @@ module.exports = function ( ) {
 	TodosList.sync ( );
 	User.sync ( );
 
-
 	var model = { Comment: Comment, Group: Group, Privacy: Privacy, Status: Status,
 					Tag: Tag, Todo: Todo, TodosList: TodosList, User: User };
 
 
 	// Models for oauth
+	model = require ( "./oauth" ) ( sequelize, model );
 
+	model.sequelize = sequelize;
+
+	return model;
 }
