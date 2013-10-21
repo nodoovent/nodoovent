@@ -8,3 +8,4 @@ tmp/
 docs
 nbproject/
 node_modules
+*.sqlite
