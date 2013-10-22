@@ -10,9 +10,9 @@ var ConsumerStrategy = require ( "passport-http-oauth" ).ConsumerStrategy;
 module.exports.name = "OAuth1 Consumer";
 
 module.exports.init = function ( model ) {
-	
-	var OAuth1Client = model.oauth.OAuth1Client;
-	var OAuth1RequestToken = model.oauth.OAuth1RequestToken;
+	var self = this;
+
+	self.model = model;
 
 	return new ConsumerStrategy (
 		/*	
@@ -20,26 +20,18 @@ module.exports.init = function ( model ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			var req = OAuth1Client.find ( { where: { consumerKey: consumerKey } } )
-			req.success ( function ( client ) {
-				if ( !client ) return callback ( null, false );
-				callback ( null, client.toJSON ( ), client.consumerSecret );
-			} );
-			req.error ( function ( err ) {
-				callback ( err );
-			} );
+			var query = self.model.oauth.OAuth1Client.find ( { where: { consumerKey: consumerKey } } )
+			query.success ( function ( client ) { callback ( null, client, client.consumerSecret ); } );
+			query.error ( function ( err ) { callback ( err ); } );
 		},
 		/*
 		 * token callback
 		 *	Finds a request token, for get an access token
 		 */
 		function ( requestToken, callback ) {
-			var req = OAuth1RequestToken.find ( { where: { requestToken: requestToken } } );
-			req.success ( function ( request ) {
-				if ( !request ) return callback ( null, false );
-				request ( null, request.requestSecret, request.toJSON ( ) );
-			} );
-			
+			var query = self.model.oauth.OAuth1RequestToken.find ( { where: { requestToken: requestToken } } );
+			query.error ( function ( err ) { callback ( err ); } );
+			query.success ( function ( token ) { callback ( null, token.requestSecret, token ); } );			
 		},
 		/*
 		 *	validate callback

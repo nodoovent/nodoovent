@@ -21,12 +21,9 @@ module.exports = function ( model ) {
 	} );
 
 	self.oauth1server.deserializeClient ( function ( clientid, callback ) {
-		var query = OAuth1Client.find ( { where: { id: clientid } } );
-		query.success ( function ( client ) {
-			if ( !client ) return callback ( null, false );
-			return callback ( null, client.toJSON ( ) );
-		} );
+		var query = self.model.oauth.OAuth1Client.find ( { where: { id: clientid } } );
 		query.error ( function ( err ) { callback ( err ); } );
+		query.success ( function ( client ) { callback ( null, client ) } );
 	} );
 
 	/*
@@ -39,31 +36,24 @@ module.exports = function ( model ) {
 	self.requestToken = [
 		passport.authenticate ( OAuth1ConsumerStrategy.name, { session: false } ),
 		self.oauth1server.requestToken ( function ( client, callbackURL, callback ) {
-			var duration = 15 * 60 * 60 * 1000;
-			var token = utils.uid ( 8 );
-			var secret = utils.uid ( 32 );
+			var duration = 15 * 60 * 60 * 1000;	
+			var token = utils.uid ( 8 );		
+			var secret = utils.uid ( 32 );		
 
 			// build OAuth1RequestToken
-			var requestToken = self.model.oauth.OAuth1RequestToken.build ( {
+			var query = self.model.oauth.OAuth1RequestToken.create ( {
 				requestToken: token,
 				requestSecret: secret,
-				callbackUrl: callbackUrl,
-				timeout: new Date.getTime ( ) + duration
+				callbackUrl: callbackURL,
+				timeout: new Date ( ).getTime ( ) + duration
 			} );
-			// get the OAuth1Client
-			var query = self.model.oauth.OAuth1Client.find ( { where: { id: client.id } } );
-			query.success ( function ( oauthclient ) {
-				// OAuht1Client to OAuth1RequestToken
-				requestToken.setOAuth1Client ( oauthclient );
-				// save the OAuth1RequestToken
-				var query = requestToken.save ( );
-				query.success ( function ( requestToken ) {
-					if ( !requestToken ) return callback ( null, false );
-					return callback ( null, token, secret );
-				} );
+			query.error ( function ( err ) { console.log ( err ); return callback ( err ); } );
+			query.success ( function ( requestToken ) {
+				// add requestToken to client
+				var query = client.addOAuth1RequestToken ( requestToken );
 				query.error ( function ( err ) { return callback ( err ); } );
+				query.success ( function ( requestToken ) { callback ( null, token, secret ); } );
 			} );
-			query.error ( function ( err ) { return callback ( err ); } );
 		} ),
 		self.oauth1server.errorHandler ( )
 	];
@@ -77,39 +67,33 @@ module.exports = function ( model ) {
 	self.accessToken = [
 		passport.authenticate ( OAuth1ConsumerStrategy.name, { session: false } ),
 		self.oauth1server.accessToken (
-			function ( requestToken, verifier, requestToken, callback ) {
-				if ( verifier != requestToken.verifier ) return callback ( null, false );
-				return callback ( null, true );
+			function ( requestToken, verifier, token, callback ) {
+				if ( verifier != requestToken.verifier && requestToken != token.requestToken ) callback ( null, false );
+				callback ( null, true );
 			},
-			function ( client, requestToken, info, callback ) {
-				if ( !info.approved ) return callback ( null, false );
-				if ( client.id !== info.client ) return callback ( null, false );
+			function ( client, requestToken, token, callback ) {
+				if ( !token.approved ) return callback ( null, false );
+				if ( client.id !== token.OAuth1ClientId ) return callback ( null, false );
 
-				var token = utils.uid ( 16 );
-				var secret = utils.uid ( 64 );
+				var accesstoken = utils.uid ( 16 );
+				var accesssecret = utils.uid ( 64 );
 
-				// build OAuth1AccessToken
-				var accessToken = self.model.oauth.OAuth1AccessToken.build ( { 
-					accessToken: token,
-					accessSecret: secret
-				} );
-				// get OAuth1Client
-				var query = self.model.oauth.OAuth1Client.find ( { where: { id: cliend.id } } );
+				// create AccessToken
+				var query = self.model.oauth.OAuth1AccessToken.create ( { accessToken: accesstoken, accessSecret: accesssecret } );
 				query.error ( function ( err ) { callback ( err ); } );
-				query.success ( function ( oauthclient ) {
-					accessToken.setOAuth1Client ( oauthclient );
-					//get User
-					var query = self.model.User.find ( { where: { id: info.user } } );
+				query.success ( function ( access ) {
+					// add access token to client
+					client.addOAuth1AccessToken ( access ).error ( function ( err ) { callback ( err ); } );
+
+					// find client
+					var query = self.model.User.find ( { where: { id: token.UserId } } );
 					query.error ( function ( err ) { callback ( err ); } );
 					query.success ( function ( user ) {
-						accessToken.setUser ( user );
-						// save instance
-						var query = accessToken.save ( );
+						// add access token to user
+						var query = user.addOAuth1AccessToken ( access );
 						query.error ( function ( err ) { callback ( err ); } );
-						query.succes ( function ( access ) {
-							callback ( null, token, secret );
-						} );
-					} ); 
+						query.success ( function ( access ) { callback ( null, access.accessToken, access.accessSecret ) } );
+					} );
 				} );
 			}
 		),
@@ -130,14 +114,13 @@ module.exports = function ( model ) {
 		self.oauth1server.userAuthorization ( function ( requestToken, callback ) {
 			var query = self.model.oauth.OAuth1RequestToken.find ( { where: { requestToken: requestToken } } );
 			query.error ( function ( err ) { callback ( err ); } );
-			query.success ( function ( rqstTkn ) {
-				var client = rqstTkn.getOAuth1Client ( );
-				return callback ( null, client.toJSON ( ), rqstTkn.callbackUrl );
+			query.success ( function ( token ) {
+				var query = self.model.oauth.OAuth1Client.find ( { where: { id: token.OAuth1ClientId } } );
+				query.error ( function ( err ) { callback ( err ); } );
+				query.success ( function ( client ) { callback ( null, client, token.callbackUrl ) } );
 			} );
 		} ),
-		function ( req, res ) {
-			// render valide authorization permission view
-		}
+		function ( req, res ) { res.send ( "ohoh !! There are some error here !!" ) }
 	];
 
 	/*
@@ -146,24 +129,27 @@ module.exports = function ( model ) {
 	 *	application.  It accepts an `issue` callback which is responsible for issuing a verifier, which is
 	 *	used to verify the subsequent request by the client to exchange the request token for an access token.
 	 */
-	module.exports.userDecision = [
+	self.userDecision = [
 		login.ensureLoggedIn ( ), // redirect to connect view (I think :D)
 		self.oauth1server.userDecision ( function ( requestToken, user, res, callback ) {
+			// get requestToken
 			var query = self.model.oauth.OAuth1RequestToken.find ( { where: { requestToken: requestToken } } );
 			query.error ( function ( err ) { callback ( err ); } );
-			query.success ( function ( rqstTkn ) {
-				rqstTkn.verifier = utils.uid ( 8 );
-				rqstTkn.approved = true;
+			query.success ( function ( requestToken ) {
+				// update values
+				requestToken.verifier = utils.uid ( 8 );
+				requestToken.approved = true;
+
+				// get User
 				var query = self.model.User.find ( { where: { id: user.id } } );
 				query.error ( function ( err ) { callback ( err ); } );
-				query.success ( function ( usr ) {
-					rqstTkn.setUser ( usr );
-					var query = rqstTkn.save ( );
+				query.success ( function ( user ) {
+					// add requestToken to user
+					var query = user.addOAuth1RequestToken ( requestToken );
 					query.error ( function ( err ) { callback ( err ); } );
-					query.success ( function ( reqToken ) { callback ( null, reqToken.verifier ); } );
+					query.success ( function ( requestToken ) { callback ( null, requestToken.verifier ) } );
 				} );
 			} );
 		} )
 	];
-
 }

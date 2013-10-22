@@ -8,11 +8,21 @@ module.exports = function ( model, auth, action ) {
 	self.root = "/oauth1";
 
 	self.routes = {
-		"/requestToken": {
-			"GET": self.auth.oauth1.requestToken
-		} 
-	}
 
+		"/requestToken": {
+			"POST": self.auth.oauth1.requestToken
+		},
+
+		"/accessToken": {
+			"POST": self.auth.oauth1.accessToken
+		},
+
+		"/authorize": {
+			"GET": self.auth.oauth1.userAuthorization,
+			"POST": self.auth.oauth1.userDecision
+		}
+
+	}
 
 	for ( var route in self.routes ) {
 		var newroute = self.root + route;

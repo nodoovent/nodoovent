@@ -11,10 +11,9 @@ var TokenStrategy = require ( "passport-http-oauth" ).TokenStrategy;
 module.exports.name = "OAuth1 Token";
 
 module.exports.init = function ( model ) {
-	
-	var OAuth1Client = model.oauth.OAuth1Client;
-	var OAuth1AccessToken = model.oauth.OAuth1AccessToken;
-	var User = model.User;
+	var self = this;
+
+	self.model = model;
 
 	return new TokenStrategy (
 		/*
@@ -22,35 +21,24 @@ module.exports.init = function ( model ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			var req = OAuth1Client.find ( { where: { consumerKey: consumerKey } } )
-			req.success ( function ( client ) {
-				if ( !client ) return callback ( null, false );
-				callback ( null, client.toJSON ( ), client.consumerSecret );
-			} );
-			req.error ( function ( err ) {
-				callback ( err );
-			} );
+			var query = self.model.oauth.OAuth1Client.find ( { where: { consumerKey: consumerKey } } )
+			query.success ( function ( client ) { callback ( null, client, client.consumerSecret ); } );
+			query.error ( function ( err ) { callback ( err ); } );
 		},
 		/*
 		 *	Verify callback
 		 *	Verify the access token
 		 */
 		function ( accessToken, callback ) {
-			var req = OAuth1AccessToken.find ( { where: { accessToken: accessToken } } );
-			req.success ( function ( access ) {
-				if ( !access ) return callback ( null, false );
-				var req = access.getUser ( );
-				req.success ( function ( user ) {
-					if ( !user ) return callback ( null, false );
+			var query = self.model.oauth.OAuth1AccessToken.find ( { where: { accessToken: accessToken } } );
+			query.error ( function ( err ) { callback ( err ); } );
+			query.success ( function ( access ) {
+				var query = self.model.User.find ( { where: { id: access.UserId } } );
+				query.error ( function ( err ) { callback ( err ); } );
+				query.success ( function ( user ) {
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission)
-					callback ( null, user.toJSON ( ), access.accessScret, info );
+					callback ( null, user, access.accessSecret, info );
 				} );
-				req.error ( function ( err ) {
-					callback ( err );
-				} );
-			} );
-			req.error ( function ( err ) {
-				callback ( err );
 			} );
 		},
 		/*
