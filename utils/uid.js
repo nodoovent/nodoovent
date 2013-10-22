@@ -6,13 +6,14 @@ var getRandomInt = function ( min, max ) {
 }
 
 module.exports = function ( len ) {
-	var buf = new Array ( );
+
+	var buf = "";
 	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	var charslen = chars.length;
 
 	for ( var i = 0; i < len; i++ ) {
-		var charindex = getRandomInt ( 0, charlen - 1);
-		buf.push ( chars[charindex] );
+		var charindex = getRandomInt ( 0, charslen - 1);
+		buf += chars[charindex];
 	}
 
 	return buf;
