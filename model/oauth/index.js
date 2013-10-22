@@ -9,12 +9,13 @@ module.exports = function ( sequelize, model ) {
 
 	// association
 	DevelopperAccount.hasMany ( OAuth1Client );
-	OAuth1Client.hasOne ( OAuth1RequestToken );
-	model.User.hasOne ( OAuth1RequestToken );
-	model.User.hasOne ( OAuth1AccessToken );
-	OAuth1Client.hasOne ( OAuth1AccessToken );
+	OAuth1Client.hasMany ( OAuth1RequestToken );
+	OAuth1Client.hasMany ( OAuth1AccessToken );
 	OAuth1AccessToken.hasMany ( Permission );
-	Permission.hasMany ( OAuth1AccessToken );
+	model.User.hasMany ( OAuth1RequestToken );
+	model.User.hasMany ( OAuth1AccessToken );
+
+
 
 	// sync
 	DevelopperAccount.sync ( );

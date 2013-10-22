@@ -21,8 +21,7 @@ module.exports.init = function ( ) {
 	User.hasMany ( User, { as: "contact", foreignKey: "userId", joinTableName: "Contacts" } );
 	User.hasMany ( Group );
 	User.hasMany ( Todo );
-	User.hasMany ( Comment );
-	User.hasOne ( Comment, { as: "author" } ); 
+	User.hasMany ( Comment ); 
 
 	Todo.hasMany ( User, { as: "participants" } );
 	Todo.hasMany ( Tag, { as: "tags" } );
