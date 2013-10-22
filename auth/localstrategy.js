@@ -23,7 +23,7 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
  		query.error ( function ( err ) { callback ( err ); } );
 		query.success ( function ( user ) {
 			if ( !user ) return callback ( null, false );
-			callback ( null, user.toJSON ( ) );	
+			callback ( null, user );	
 		} );
  	} );
 
@@ -33,11 +33,11 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 	 		passwordField: "password"
 	 	},
  		function ( login, password, callback ) {
-	 		var query = User.find ( { where: { pseudonyme: login } } );
+	 		var query = User.find ( { where: { login: login } } );
 	 		query.error ( function ( err ) { callback ( err ); } );
 	 		query.success ( function ( user ) {
 	 			if ( !user ) return callback ( null, false );
-	 			callback ( null, user.toJSON ( ) );
+	 			callback ( null, user );
 	 		} );
  		}
  	);

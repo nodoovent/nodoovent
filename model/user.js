@@ -18,7 +18,7 @@ module.exports = function ( sequelize ) {
 			lastName: {
 				type: Sequelize.STRING
 			},
-			pseudonyme: {
+			login: {
 				type: Sequelize.STRING,
 				unique: true,
 				allowNull: false
@@ -43,7 +43,7 @@ module.exports = function ( sequelize ) {
 						id: this.id,
 						firstName: this.firstName,
 						lastName: this.lastName,
-						pseudonyme: this.pseudonyme,
+						login: this.login,
 						email: this.email
 					};
 				}
