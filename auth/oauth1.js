@@ -92,7 +92,12 @@ module.exports = function ( model ) {
 						// add access token to user
 						var query = user.addOAuth1AccessToken ( access );
 						query.error ( function ( err ) { callback ( err ); } );
-						query.success ( function ( access ) { callback ( null, access.accessToken, access.accessSecret ) } );
+						query.success ( function ( access ) { 
+							// remove requestToken
+							var query = token.destroy ( );
+							query.error ( function ( err ) { callback ( err ); } );
+							query.success ( function ( ) { callback ( null, access.accessToken, access.accessSecret ); } );
+						} );
 					} );
 				} );
 			}
