@@ -8,11 +8,14 @@ module.exports = function ( app, routes ) {
 	 *	}
 	 */
 
+	 var regexp = "regexp ";
 
 	for ( var route in routes ) {
 		var _route = routes[route];
 		for ( var method in _route ) {
 			var action = _route[method];
+			if ( route.substring ( 0, regexp.length ) == regexp )
+				route = new RegExp ( route.substring ( regexp.length ) );
 			switch ( method ) {
 				case "POST":
 					app.post ( route, action );
