@@ -7,7 +7,22 @@ module.exports = function ( model, auth, action ) {
 
 	self.routes = {
 		"/user": {
-			"GET": action.user.get
+			"GET": self.action.user.get,
+			"PUT": self.action.user.update,
+			"POST": self.action.user.add,
+			"DELETE": self.action.user.delete
+		},
+
+		"/users": {
+			"GET": self.action.user.list
+		},
+
+		"regexp \/user\/([0-9]+)": { // "/user/1"
+			"GET": self.action.user.getById
+		},
+
+		"/user/:login": {
+			"GET": self.action.user.getByLogin
 		}
 	}
 }
