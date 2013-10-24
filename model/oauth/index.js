@@ -8,12 +8,13 @@ module.exports = function ( sequelize, model ) {
 	var Permission = require ( "./permission" ) ( sequelize );
 
 	// association
-	DevelopperAccount.hasMany ( OAuth1Client );
-	OAuth1Client.hasMany ( OAuth1RequestToken );
-	OAuth1Client.hasMany ( OAuth1AccessToken );
-	OAuth1AccessToken.hasMany ( Permission );
-	model.User.hasMany ( OAuth1RequestToken );
-	model.User.hasMany ( OAuth1AccessToken );
+	var constraint = { onDelete: "cascade", onUpdate: "cascade" };
+	DevelopperAccount.hasMany ( OAuth1Client, constraint );
+	OAuth1Client.hasMany ( OAuth1RequestToken, constraint );
+	OAuth1Client.hasMany ( OAuth1AccessToken, constraint );
+	OAuth1AccessToken.hasMany ( Permission, constraint );
+	model.User.hasMany ( OAuth1RequestToken, constraint );
+	model.User.hasMany ( OAuth1AccessToken, constraint );
 
 
 
