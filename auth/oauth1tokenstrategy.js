@@ -33,6 +33,7 @@ module.exports.init = function ( model ) {
 			var query = self.model.oauth.OAuth1AccessToken.find ( { where: { accessToken: accessToken } } );
 			query.error ( function ( err ) { callback ( err ); } );
 			query.success ( function ( access ) {
+				if ( access == null ) return callback ( "No AccessToken matching with " + accessToken );
 				var query = self.model.User.find ( { where: { id: access.UserId } } );
 				query.error ( function ( err ) { callback ( err ); } );
 				query.success ( function ( user ) {
