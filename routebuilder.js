@@ -9,26 +9,28 @@ module.exports = function ( app, routes ) {
 	 */
 
 	 var regexp = "regexp ";
+	 var lregexp = regexp.length;
 
 	for ( var route in routes ) {
 		var _route = routes[route];
 		for ( var method in _route ) {
 			var action = _route[method];
-			if ( route.substring ( 0, regexp.length ) == regexp )
-				route = new RegExp ( route.substring ( regexp.length ) );
+			var r = route;
+			if ( route.substring ( 0, lregexp) == regexp )
+				r = new RegExp ( route.substring ( lregexp ) );
 			switch ( method ) {
 				case "POST":
-					app.post ( route, action );
+					app.post ( r, action );
 					break;
 				case "PUT":
-					app.put ( route, action );
+					app.put ( r, action );
 					break;
 				case "DELETE":
-					app.delete ( route, action );
+					app.delete ( r, action );
 					break;
 				case "GET":
 				default:
-					app.get ( route, action );
+					app.get ( r, action );
 					break;
 			}
 		}
