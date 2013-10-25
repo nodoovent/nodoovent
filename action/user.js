@@ -36,8 +36,13 @@ module.exports = function ( model, auth ) {
 	self.list = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.User.findAll ( );
-			query.success ( function ( users ) { res.send ( { users: users } ); } )
+			var where = [ ];
+			if ( req.param ( "login" ) )
+				where.push ( "login like ?", "%" + req.param ( "login" ) + "%" );
+			var query = null;
+			if ( where.length != 0 ) query = self.model.User.findAll ( { where: where } );
+			else query = self.model.User.findAll ( );
+			query.success ( function ( users ) { res.send ( users ); } )
 		}
 	];
 
