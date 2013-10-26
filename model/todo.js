@@ -19,7 +19,7 @@ module.exports = function ( sequelize ) {
 			description: {
 				type: Sequelize.STRING
 			},
-			due_date: {
+			dueDate: {
 				type: Sequelize.DATE 
 				/* we can use this instead :
 				type: Sequelize.STRING,
