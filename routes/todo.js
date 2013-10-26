@@ -9,6 +9,10 @@ module.exports = function ( model, auth, action ) {
 
 		"/user/todo": {
 			"POST": self.action.todo.create
+		},
+
+		"/user/todos": {
+			"GET": self.action.todo.userList
 		}
 
 	}

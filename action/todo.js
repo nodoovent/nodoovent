@@ -48,4 +48,21 @@ module.exports = function ( model, auth ) {
 		}
 	];
 
+	self.userList = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			// get paticipant todos
+			var query = req.user.getTodoes ( );
+			query.success ( function ( todos ) {
+				var _todos = todos;
+				// get author todos
+				var query = self.model.Todo.findAll ( { where: { UserId: req.user.id } } );
+				query.success ( function ( todos ) {
+					_todos.push ( todos );
+					res.send ( _todos );
+				} );
+			} );
+		}
+	];
+
 }
