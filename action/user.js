@@ -58,20 +58,17 @@ module.exports = function ( model, auth ) {
 		}
 	];
 
-	self.add = [
-		passport.authenticate( oauth1tokenstrategy, { session: false }),
-		function ( req, res ) {
-			var newuser = {
-				firstName: req.param ( "firstName" ),
-				lastName: req.param ( "lastName" ),
-				login: req.param ( "login" ),
-				password: req.param ( "password"),
-				email: req.param ( "email" )
-			};
-			var query = self.model.User.create ( newuser );
-			query.success ( function ( user ) { res.send ( user ); } );
-		}
-	];
+	self.create = function ( req, res ) {
+		var newuser = {
+			firstName: req.param ( "firstName" ),
+			lastName: req.param ( "lastName" ),
+			login: req.param ( "login" ),
+			password: req.param ( "password"),
+			email: req.param ( "email" )
+		};
+		var query = self.model.User.create ( newuser );
+		query.success ( function ( user ) { res.send ( user ); } );
+	}
 
 	self.delete = [
 		passport.authenticate( oauth1tokenstrategy, { session: false }),

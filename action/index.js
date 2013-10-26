@@ -1,7 +1,9 @@
 var passport = require ( "passport" );
 var localstrategy = require ( "../auth/localstrategy" ).name;
 
-
+var privacy = require ( "./privacy" );
+var status = require ( "./status" );
+var todo = require ( "./todo" );
 var user = require ( "./user" );
 var oauth1 = require ( "./oauth1" );
 
@@ -22,7 +24,10 @@ module.exports = function ( model, auth ) {
 
 	self.login = passport.authenticate ( localstrategy,  { successReturnToOrRedirect: '/', failureRedirect: '/login' } );
 
-	self.user = new user ( model, auth );
-	self.oauth1 = new oauth1 ( model, auth );
+	self.privacy = new privacy ( self.model, self.auth );
+	self.status = new status ( self.model, self.auth );
+	self.todo = new todo ( self.model, self.auth );
+	self.user = new user ( self.model, self.auth );
+	self.oauth1 = new oauth1 ( self.model, self.auth );
 
 }

@@ -16,12 +16,12 @@ module.exports = function ( model, auth, action ) {
 
 	self.routes = {
 		"/": {
-			"GET": action.index
+			"GET": self.action.index
 		},
 
 		"/login": {
-			"GET": action.loginForm,
-			"POST": action.login
+			"GET": self.action.loginForm,
+			"POST": self.action.login
 		}
 	}
 

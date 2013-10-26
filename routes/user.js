@@ -9,7 +9,7 @@ module.exports = function ( model, auth, action ) {
 		"/user": {
 			"GET": self.action.user.get,
 			"PUT": self.action.user.update,
-			"POST": self.action.user.add,
+			"POST": self.action.user.create,
 			"DELETE": self.action.user.delete
 		},
 
