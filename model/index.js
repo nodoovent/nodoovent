@@ -23,11 +23,10 @@ module.exports.init = function ( ) {
 	User.hasMany ( Todo );
 	User.hasMany ( Comment ); 
 
-	Todo.hasMany ( User, { as: "participants" } );
-	Todo.hasMany ( Tag, { as: "tags" } );
-	Todo.hasMany ( Comment, { as: "Comments" } );
-	Todo.belongsTo ( Status, { as: "currentStatus" } );
-	Todo.belongsTo ( User, { as: "creator" } );
+	Todo.hasMany ( User );
+	Todo.hasMany ( Tag );
+	Todo.hasMany ( Comment );
+	Todo.belongsTo ( User );
 
 	Tag.hasMany ( Todo );
 
@@ -37,7 +36,6 @@ module.exports.init = function ( ) {
 
 	Group.hasMany ( User );
 	Group.hasMany ( Todo );
-	Group.hasOne ( Todo, { as: "group" } );
 	Group.belongsTo ( User, { as: "administrator" } );
 
 	Privacy.hasOne ( Todo, { as: "privacy" } );
@@ -62,6 +60,25 @@ module.exports.init = function ( ) {
 	model = require ( "./oauth" ) ( sequelize, model );
 
 	model.sequelize = sequelize;
+
+
+	// insert default Status values
+	model.Status.count ( ).success ( function ( count ) {
+		if ( count == 0 ) {
+			var status = [  "Created", "In Progress", "Done", "Canceled", "In Development", "Rejected" ];
+			for ( var i in status )
+				model.Status.create ( { name: status[i] } ).success ( function ( status ) { console.log ( "The status " + status.name + " has been added" ); } );
+		}
+	} );
+
+	// insert default Privacies values
+	model.Privacy.count ( ).success ( function ( count ) {
+		if ( count == 0 ) {
+			var privacies = [ "Public", "Private" ];
+			for ( var i in privacies )
+				model.Privacy.create ( { name: privacies[i] } ).success ( function ( privacy ) { console.log ( "The privacy " + privacy.name + " has been added" ); } );
+		}
+	} );
 
 	return model;
 }
