@@ -33,7 +33,7 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 	 		passwordField: "password"
 	 	},
  		function ( login, password, callback ) {
-	 		var query = User.find ( { where: { login: login } } );
+	 		var query = User.find ( { where: { login: login, password: password } } );
 	 		query.error ( function ( err ) { callback ( err ); } );
 	 		query.success ( function ( user ) {
 	 			if ( !user ) return callback ( null, false );

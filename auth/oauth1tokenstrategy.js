@@ -34,7 +34,7 @@ module.exports.init = function ( model ) {
 			query.error ( function ( err ) { callback ( err ); } );
 			query.success ( function ( access ) {
 				if ( access == null ) return callback ( "No AccessToken matching with " + accessToken );
-				var query = self.model.User.find ( { where: { id: access.UserId } } );
+				var query = self.model.User.find ( access.UserId );
 				query.error ( function ( err ) { callback ( err ); } );
 				query.success ( function ( user ) {
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission)
