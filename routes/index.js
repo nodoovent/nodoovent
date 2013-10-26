@@ -33,6 +33,7 @@ module.exports = function ( model, auth, action ) {
 
 	_.extend ( self.routes, self.privacy.routes );
 	_.extend ( self.routes, self.status.routes );
+	_.extend ( self.routes, self.todo.routes );
 	_.extend ( self.routes, self.user.routes );
 	_.extend ( self.routes, self.oauth1.routes ); 
 
