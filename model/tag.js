@@ -13,7 +13,7 @@ module.exports = function ( sequelize ) {
 		{
 			tag: {
 				type: Sequelize.STRING,
-				primaryKey: true
+				unique: true
 			}
 		},
 		{
