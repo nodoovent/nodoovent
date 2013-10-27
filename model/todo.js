@@ -38,7 +38,10 @@ module.exports = function ( sequelize ) {
 						id: this.id,
 						name: this.name,
 						description: this.description,
-						due_date: this.date
+						dueDate: this.dueDate,
+						author: this.UserId,
+						status: this.StatuId,
+						privacy: this.privacy
 					};
 				}
 			}
