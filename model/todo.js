@@ -39,9 +39,11 @@ module.exports = function ( sequelize ) {
 						name: this.name,
 						description: this.description,
 						dueDate: this.dueDate,
+						createdAt: this.createdAt,
+						updatedAt: this.updatedAt,
 						author: this.UserId,
 						status: this.StatuId,
-						privacy: this.privacy
+						privacy: this.PrivacyId
 					};
 				}
 			}
