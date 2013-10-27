@@ -13,6 +13,10 @@ module.exports = function ( model, auth, action ) {
 
 		"/user/todos": {
 			"GET": self.action.todo.userList
+		},
+
+		"/user/todo/:id": {
+			"GET": self.action.todo.getById
 		}
 
 	}

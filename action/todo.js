@@ -35,6 +35,7 @@ module.exports = function ( model, auth ) {
 						for ( var i in ptags )
 							chainer.add ( self.model.Tag.create ( { tag: ptags[i] } ) );
 						var f = function ( ) {
+							todo.tags = ptags;
 							var query = self.model.Tag.findAll ( { where: { tag: ptags } } );
 							query.success ( function ( tags ) {
 								var query = todo.setTags ( tags );
@@ -51,16 +52,59 @@ module.exports = function ( model, auth ) {
 	self.userList = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			// get paticipant todos
-			var query = req.user.getTodoes ( );
+
+			var sql = "SELECT t.id, t.name, t.description, t.dueDate, t.createdAt, t.updatedAt, t.UserId 'author', "
+					+ "t.StatuId 'status', t.PrivacyId 'privacy', tag.tag "
+					+ "FROM todo t "
+					+ "LEFT JOIN tagtodo tt ON tt.TodoId = t.id "
+					+ "LEFT JOIN tag ON tag.id = tt.TagId "
+					+ "WHERE t.userId = :userid "
+					+ "OR t.id IN ( SELECT TodoId FROM TodoUser WHERE UserId = :userid )";
+			var query = self.model.sequelize.query ( sql, null, { raw: true }, { userid: req.user.id } );
 			query.success ( function ( todos ) {
-				var _todos = todos;
-				// get author todos
-				var query = self.model.Todo.findAll ( { where: { UserId: req.user.id } } );
-				query.success ( function ( todos ) {
-					_todos.push ( todos );
-					res.send ( _todos );
-				} );
+				// adjust object return : delete repetitive elements, join tags of repetitive elements into one array, join status and privacy info into object
+				var l = todos.length;
+				for ( var i = 0; i < l; i++ ) {
+					var todo = todos[i];
+					if ( i == 0 ) {
+						if ( todo.tag )
+							todo.tags = [ todo.tag ];
+						delete todo.tag;
+					} else if ( todo.id != todos[i-1].id ) { // if element is the first occurence trans tag on an array contain the tag
+						todo.tags = [ todo.tag ];
+						delete todo.tag;
+					} else { // else add tag into the tags array of the first occurence and delete the element
+						todos[i-1].tags.push ( todo.tag );
+						todos.splice ( i, 1 );
+						l = todos.length;
+						i--;
+					}
+				}
+				res.send ( todos );
+			} );
+		}
+	];
+
+	self.getById = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var todoid = req.param ( "id" );
+			var sql = "SELECT t.id, t.name, t.description, t.dueDate, t.createdAt, t.updatedAt, t.UserId 'author', "
+					+ "t.StatuId 'status', t.PrivacyId 'privacy', tag.tag "
+					+ "FROM todo t "
+					+ "LEFT JOIN tagtodo tt ON tt.TodoId = t.id "
+					+ "LEFT JOIN tag ON tag.id = tt.TagId "
+					+ "WHERE t.id = :todoid ";
+			var query = self.model.sequelize.query ( sql, null, { raw: true }, { todoid: todoid } );
+			query.success ( function ( todos ) {
+				var todo = todos[0];
+				if ( todo.tag ) {
+					todo.tags = [ todo.tag ];
+					for ( var i = 1; i < todos.length; i++ )
+						todo.tags.push ( todos[i].tag );
+				}
+				delete todo.tag;
+				res.send ( todo );
 			} );
 		}
 	];
