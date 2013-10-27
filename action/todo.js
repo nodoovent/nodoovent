@@ -97,14 +97,31 @@ module.exports = function ( model, auth ) {
 					+ "WHERE t.id = :todoid ";
 			var query = self.model.sequelize.query ( sql, null, { raw: true }, { todoid: todoid } );
 			query.success ( function ( todos ) {
-				var todo = todos[0];
-				if ( todo.tag ) {
-					todo.tags = [ todo.tag ];
-					for ( var i = 1; i < todos.length; i++ )
-						todo.tags.push ( todos[i].tag );
-				}
-				delete todo.tag;
-				res.send ( todo );
+				if ( todos.length > 0 ) {
+					var todo = todos[0];
+					if ( todo.tag ) {
+						todo.tags = [ todo.tag ];
+						for ( var i = 1; i < todos.length; i++ )
+							todo.tags.push ( todos[i].tag );
+					}
+					delete todo.tag;
+					res.send ( todo );
+				} else res.send ( { result: "error", error: "Todo " + todoid + " not exist" } );
+			} );
+		}
+	];
+
+	self.delete = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var todoid = req.param ( "id" );
+			var query = self.model.Todo.find ( todoid );
+			query.success ( function ( todo ) {
+				if ( todo.UserId == req.user.id ) {
+					var query = todo.destroy ( );
+					query.success ( function ( ) { res.send ( { result: "ok" } ); } );
+					query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
+				} else res.send ( { result: "error", error: "You're not authorize to delete this todo" } );
 			} );
 		}
 	];

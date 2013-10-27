@@ -16,7 +16,8 @@ module.exports = function ( model, auth, action ) {
 		},
 
 		"/user/todo/:id": {
-			"GET": self.action.todo.getById
+			"GET": self.action.todo.getById,
+			"DELETE": self.action.todo.delete
 		}
 
 	}
