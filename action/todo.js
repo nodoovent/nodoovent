@@ -52,17 +52,16 @@ module.exports = function ( model, auth ) {
 	self.userList = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-
 			var sql = "SELECT t.id, t.name, t.description, t.dueDate, t.createdAt, t.updatedAt, t.UserId 'author', "
 					+ "t.StatuId 'status', t.PrivacyId 'privacy', tag.tag "
 					+ "FROM todo t "
 					+ "LEFT JOIN tagtodo tt ON tt.TodoId = t.id "
 					+ "LEFT JOIN tag ON tag.id = tt.TagId "
-					+ "WHERE t.userId = :userid "
+					+ "WHERE t.UserId = :userid "
 					+ "OR t.id IN ( SELECT TodoId FROM TodoUser WHERE UserId = :userid )";
 			var query = self.model.sequelize.query ( sql, null, { raw: true }, { userid: req.user.id } );
 			query.success ( function ( todos ) {
-				// adjust object return : delete repetitive elements, join tags of repetitive elements into one array, join status and privacy info into object
+				// adjust object return : delete repetitive elements, join tags of repetitive elements into one arra
 				var l = todos.length;
 				for ( var i = 0; i < l; i++ ) {
 					var todo = todos[i];
@@ -122,6 +121,68 @@ module.exports = function ( model, auth ) {
 					query.success ( function ( ) { res.send ( { result: "ok" } ); } );
 					query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
 				} else res.send ( { result: "error", error: "You're not authorize to delete this todo" } );
+			} );
+		}
+	];
+
+	self.update = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var todoid = req.param ( "id" );
+			var query = self.model.Todo.find ( todoid );
+			query.success ( function ( todo ) {
+				if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
+				if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
+				if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
+				if ( req.param ( "status" ) ) todo.StatuId = req.param ( "status" );
+				if ( req.param ( "privacy" ) ) todo.PrivacyId = req.param ( "privacy" );
+				var query = todo.save ( );
+				query.success ( function ( todo ) {
+					var query = todo.getTags ( );
+					query.success ( function ( tags ) {
+						var _todo = todo.toJSON ( );
+						if ( tags.length > 0 ) {
+							_todo.tags = [ ];
+							for ( var i in tags ) _todo.tags.push ( tags[i].dataValues.tag );
+						}
+						res.send ( _todo );
+					} );
+				} );
+			} );
+		}
+	];
+
+	self.list = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var sql = "SELECT t.id, t.name, t.description, t.dueDate, t.createdAt, t.updatedAt, t.UserId 'author', "
+					+ "t.StatuId 'status', t.PrivacyId 'privacy', tag.tag "
+					+ "FROM todo t "
+					+ "LEFT JOIN tagtodo tt ON tt.TodoId = t.id "
+					+ "LEFT JOIN tag ON tag.id = tt.TagId "
+					+ "WHERE ( t.UserId <> :userid AND t.PrivacyId in ( SELECT id FROM Privacy WHERE name = 'Public' ) ) "
+					+ "OR t.UserId = :userid";
+			var query = self.model.sequelize.query ( sql, null, { raw: true }, { userid: req.user.id } );
+			query.success ( function ( todos ) {
+				// adjust object return : delete repetitive elements, join tags of repetitive elements into one arra
+				var l = todos.length;
+				for ( var i = 0; i < l; i++ ) {
+					var todo = todos[i];
+					if ( i == 0 ) {
+						if ( todo.tag )
+							todo.tags = [ todo.tag ];
+						delete todo.tag;
+					} else if ( todo.id != todos[i-1].id ) { // if element is the first occurence trans tag on an array contain the tag
+						todo.tags = [ todo.tag ];
+						delete todo.tag;
+					} else { // else add tag into the tags array of the first occurence and delete the element
+						todos[i-1].tags.push ( todo.tag );
+						todos.splice ( i, 1 );
+						l = todos.length;
+						i--;
+					}
+				}
+				res.send ( todos );
 			} );
 		}
 	];
