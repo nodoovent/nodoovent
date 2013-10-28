@@ -7,15 +7,15 @@ module.exports = function ( model, auth, action ) {
 
 	self.routes = {
 
-		"/user/todo": {
-			"POST": self.action.todo.create
-		},
-
-		"/user/todos": {
+		"/user/:userid/todos": {
 			"GET": self.action.todo.userList
 		},
 
-		"/user/todo/:id": {
+		"/todo/": {
+			"POST": self.action.todo.create
+		},
+
+		"/todo/:id": {
 			"GET": self.action.todo.getById,
 			"DELETE": self.action.todo.delete,
 			"PUT": self.action.todo.update

@@ -1,4 +1,5 @@
 var passport = require ( "passport" );
+var QueryChainer = require ( "Sequelize" ).Utils.QueryChainer;
 
 var oauth1tokenstrategy = require ( "../auth/oauth1tokenstrategy" ).name;
 
@@ -19,12 +20,12 @@ module.exports = function ( model, auth ) {
 	self.getById = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.User.find ( req.param ( 0 ) );
+			var query = self.model.User.find ( req.param ( "userid" ) );
 			query.success ( function ( user ) { res.send ( user ); } );
 		}
 	];
 
-	self.getByLogin = [
+	self.getByLogin = [	// /!\ Unused /!\ ( gonna be used one day ??)
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
 			console.log ( req.param ( "login" ) );
@@ -71,11 +72,41 @@ module.exports = function ( model, auth ) {
 	}
 
 	self.delete = [
-		passport.authenticate( oauth1tokenstrategy, { session: false }),
+		passport.authenticate( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
 			var query = req.user.destroy ( );
 			query.success ( function ( ) { res.send ( { result: "ok" } ); } );
 		}
+	];
+
+	self.addContact = [
+		passport.authenticate( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var query = self.model.User.find ( req.param ( "contact" ) );
+			query.success ( function ( user ) {
+				var query = req.user.hasContact ( user );
+				query.success ( function ( result ) {
+					if ( result ) {
+						res.send ( req.user );
+					} else {
+						var query = req.user.addContact ( user );
+						query.success ( function ( user ) { res.send ( req.user ); } );
+					}
+				} );
+			} );
+		}
+	];
+
+	self.contactList = [
+		passport.authenticate( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var query = req.user.getContact ( );
+			query.success ( function ( contacts ) {
+				var users = [ ];
+				for ( var i in contacts ) users.push ( { id: contacts[i].dataValues.id, login: contacts[i].dataValues.login } );
+				res.send ( users );
+			} );
+		}	
 	];
 
 }

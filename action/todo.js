@@ -59,7 +59,7 @@ module.exports = function ( model, auth ) {
 					+ "LEFT JOIN tag ON tag.id = tt.TagId "
 					+ "WHERE t.UserId = :userid "
 					+ "OR t.id IN ( SELECT TodoId FROM TodoUser WHERE UserId = :userid )";
-			var query = self.model.sequelize.query ( sql, null, { raw: true }, { userid: req.user.id } );
+			var query = self.model.sequelize.query ( sql, null, { raw: true }, { userid: req.param ( "userid" ) } );
 			query.success ( function ( todos ) {
 				// adjust object return : delete repetitive elements, join tags of repetitive elements into one arra
 				var l = todos.length;
@@ -131,23 +131,25 @@ module.exports = function ( model, auth ) {
 			var todoid = req.param ( "id" );
 			var query = self.model.Todo.find ( todoid );
 			query.success ( function ( todo ) {
-				if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
-				if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
-				if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
-				if ( req.param ( "status" ) ) todo.StatuId = req.param ( "status" );
-				if ( req.param ( "privacy" ) ) todo.PrivacyId = req.param ( "privacy" );
-				var query = todo.save ( );
-				query.success ( function ( todo ) {
-					var query = todo.getTags ( );
-					query.success ( function ( tags ) {
-						var _todo = todo.toJSON ( );
-						if ( tags.length > 0 ) {
-							_todo.tags = [ ];
-							for ( var i in tags ) _todo.tags.push ( tags[i].dataValues.tag );
-						}
-						res.send ( _todo );
+				if ( todo.UserId == req.user.id ) {
+					if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
+					if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
+					if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
+					if ( req.param ( "status" ) ) todo.StatuId = req.param ( "status" );
+					if ( req.param ( "privacy" ) ) todo.PrivacyId = req.param ( "privacy" );
+					var query = todo.save ( );
+					query.success ( function ( todo ) {
+						var query = todo.getTags ( );
+						query.success ( function ( tags ) {
+							var _todo = todo.toJSON ( );
+							if ( tags.length > 0 ) {
+								_todo.tags = [ ];
+								for ( var i in tags ) _todo.tags.push ( tags[i].dataValues.tag );
+							}
+							res.send ( _todo );
+						} );
 					} );
-				} );
+				} else res.send ( { result: "error", error: "You're not authorize to update this todo" } );
 			} );
 		}
 	];
