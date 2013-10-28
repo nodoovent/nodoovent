@@ -21,9 +21,18 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.user.getById
 		},
 
-		"/contacts": {
-			"GET": self.action.user.contactList,
+		"/contact": {
 			"POST": self.action.user.addContact
+		},
+
+		"/contact/:id": {
+			"DELETE": self.action.user.deleteContact,
+			"GET": self.action.user.getContact
+		},
+
+		"/contacts": {
+			"GET": self.action.user.contactList
 		}
+
 	}
 }

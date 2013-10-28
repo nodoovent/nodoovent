@@ -87,10 +87,10 @@ module.exports = function ( model, auth ) {
 				var query = req.user.hasContact ( user );
 				query.success ( function ( result ) {
 					if ( result ) {
-						res.send ( req.user );
+						self.contactList[1] ( req, res );
 					} else {
 						var query = req.user.addContact ( user );
-						query.success ( function ( user ) { res.send ( req.user ); } );
+						query.success ( function ( user ) { self.contactList[1] ( req, res ); } );
 					}
 				} );
 			} );
@@ -107,6 +107,32 @@ module.exports = function ( model, auth ) {
 				res.send ( users );
 			} );
 		}	
+	];
+
+	self.deleteContact = [
+		passport.authenticate( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var query = self.model.User.find ( req.param ( "id" ) );
+			query.success ( function ( user ) {
+				var query = req.user.removeContact ( user );
+				query.success ( function ( ) { res.send ( { result: "ok" } ); } );
+				query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
+			} );
+		}
+	];
+
+	self.getContact = [
+		passport.authenticate( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var query = self.model.User.find ( req.param ( "id" ) );
+			query.success ( function ( user ) {
+				var query = req.user.hasContact ( user );
+				query.success ( function ( result ) {
+					if ( result ) res.send ( {id: user.id, login: user.login } );
+					else res.send ( { } );
+				} );
+			} );
+		}
 	];
 
 }
