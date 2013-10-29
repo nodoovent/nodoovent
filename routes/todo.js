@@ -11,7 +11,7 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.todo.userList
 		},
 
-		"/todo/": {
+		"/todo": {
 			"POST": self.action.todo.create
 		},
 
@@ -23,6 +23,10 @@ module.exports = function ( model, auth, action ) {
 
 		"/todos": {
 			"GET": self.action.todo.list
+		},
+
+		"/todo/:id/tags": {
+			"GET": self.action.todo.getTags
 		}
 
 	}

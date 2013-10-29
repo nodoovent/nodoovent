@@ -189,4 +189,19 @@ module.exports = function ( model, auth ) {
 		}
 	];
 
+	self.getTags = [
+		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		function ( req, res ) {
+			var query = self.model.Todo.find ( req.param ( "id" ) );
+			query.success ( function ( todo ) {
+				var query = todo.getTags ( );
+				query.success ( function ( tags ) {
+					_tags = [ ];
+					for ( var i in tags ) _tags.push ( tags[i].dataValues.tag );
+					res.send ( _tags );
+				} );
+			} );
+		}
+	];
+
 }
