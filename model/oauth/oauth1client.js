@@ -29,7 +29,7 @@ module.exports = function ( sequelize ) {
 				toJSON: function ( ) {
 					return {
 						id: this.id,
-						name: this.firstName,
+						name: this.name,
 						description: this.description,
 						consumerKey: this.consumerKey,
 						consumerSecret: this.consumerSecret
