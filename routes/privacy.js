@@ -10,7 +10,7 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.privacy.list
 		},
 
-		"regexp \/privacy\/([0-9]+)": {
+		"/privacies/:id": {
 			"GET": self.action.privacy.getbyId
 		}
 	}
