@@ -11,7 +11,10 @@ module.exports = function ( model, auth ) {
 
 	self.getbyId = function ( req, res ) {
 		var query = self.model.Status.find ( req.param ( 0 ) );
-		query.success ( function ( status ) { res.send ( status ) } );
+		query.success ( function ( status ) { 
+			if ( status ) res.send ( status );
+			else res.status ( 404 ).send ( );
+		} );
 	}
 	
 }
