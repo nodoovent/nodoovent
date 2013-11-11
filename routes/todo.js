@@ -7,25 +7,26 @@ module.exports = function ( model, auth, action ) {
 
 	self.routes = {
 
+		// search todos for one user
 		"/user/:userid/todos": {
 			"GET": self.action.todo.userList
 		},
 
-		"/todo": {
-			"POST": self.action.todo.create
+		
+		"/todos": {
+			"POST": self.action.todo.create,	// add a todo for the authenticate user
+			"GET": self.action.todo.list 		// search in all todos
 		},
 
-		"/todo/:id": {
+		// use to manipulate todos (if authenticate user if is authorized)
+		"/todos/:id": {
 			"GET": self.action.todo.getById,
 			"DELETE": self.action.todo.delete,
 			"PUT": self.action.todo.update
 		},
 
-		"/todos": {
-			"GET": self.action.todo.list
-		},
-
-		"/todo/:id/tags": {
+		// manipulate tags of a todo
+		"/todos/:id/tags": {
 			"GET": self.action.todo.getTags
 		}
 
