@@ -1,5 +1,12 @@
-module.exports = {
+module.exports = function ( mode ) {
 	
-	db: require ( "./db" )
-	
-}
+	var conf = { };
+
+	if ( mode == "test" ) {
+		conf.db = require ( "./test/db" );
+	} else {
+		conf.db = require ( "./db" );
+	}
+
+	return conf;
+};

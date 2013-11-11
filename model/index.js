@@ -1,8 +1,7 @@
 var Sequelize = require ( "Sequelize" );
-var conf = require ( "../conf" ).db;
 
 
-module.exports.init = function ( ) {
+module.exports.init = function ( conf, callback ) {
 
 	var dbengine = conf[conf.dbengine];
 	var sequelize = new Sequelize ( dbengine.database, dbengine.username, dbengine.password, dbengine.conf );
@@ -43,42 +42,47 @@ module.exports.init = function ( ) {
 	TodosList.belongsTo ( User, {as: "Creator" } );
 
 	// Sync nodoovent model with database
-	Comment.sync ( );
-	Group.sync ( );
-	Privacy.sync ( );
-	Status.sync ( );
-	Tag.sync ( );
-	Todo.sync ( );
-	TodosList.sync ( );
-	User.sync ( );
+	var chainer = new Sequelize.Utils.QueryChainer;
+	chainer.add ( Comment.sync ( ) );
+	chainer.add ( Group.sync ( ) );
+	chainer.add ( Privacy.sync ( ) );
+	chainer.add ( Status.sync ( ) );
+	chainer.add ( Tag.sync ( ) );
+	chainer.add ( Todo.sync ( ) );
+	chainer.add ( TodosList.sync ( ) );
+	chainer.add ( User.sync ( ) );
 
 	var model = { Comment: Comment, Group: Group, Privacy: Privacy, Status: Status,
 					Tag: Tag, Todo: Todo, TodosList: TodosList, User: User };
 
 
 	// Models for oauth
-	model = require ( "./oauth" ) ( sequelize, model );
+	model = require ( "./oauth" ) ( sequelize, model, chainer );
 
 	model.sequelize = sequelize;
 
+	var syncDb = function ( err ) {
+		if ( err ) return callback ( err );
+		// insert default Status and Privacies values
+		var chainer = new Sequelize.Utils.QueryChainer;
+		model.Status.count ( ).success ( function ( count ) {
+			if ( count == 0 ) {
+				var status = [  "Created", "In Progress", "Done", "Canceled", "In Development", "Rejected" ];
+				for ( var i in status )
+					chainer.add ( Status.create ( { name: status[i] } ) );
+			}
+			model.Privacy.count ( ).success ( function ( count ) {
+				if ( count == 0 ) {
+					var privacies = [ "Public", "Private" ];
+					for ( var i in privacies )
+						chainer.add ( Privacy.create ( { name: privacies[i] } ) );
+				}
+				chainer.run ( ).success ( function ( ) { callback ( ); } ).error ( function ( err ) { callback ( err ); } );
+			} );
+		} );
+	};
 
-	// insert default Status values
-	model.Status.count ( ).success ( function ( count ) {
-		if ( count == 0 ) {
-			var status = [  "Created", "In Progress", "Done", "Canceled", "In Development", "Rejected" ];
-			for ( var i in status )
-				model.Status.create ( { name: status[i] } ).success ( function ( status ) { console.log ( "The status " + status.name + " has been added" ); } );
-		}
-	} );
-
-	// insert default Privacies values
-	model.Privacy.count ( ).success ( function ( count ) {
-		if ( count == 0 ) {
-			var privacies = [ "Public", "Private" ];
-			for ( var i in privacies )
-				model.Privacy.create ( { name: privacies[i] } ).success ( function ( privacy ) { console.log ( "The privacy " + privacy.name + " has been added" ); } );
-		}
-	} );
+	chainer.run ( ).success ( function ( ) { syncDb ( ); } ).error ( function ( err ) { syncDb ( err ); } ); 
 
 	return model;
 }

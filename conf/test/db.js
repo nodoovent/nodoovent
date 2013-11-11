@@ -1,5 +1,5 @@
 /*
- *	Database Configuration
+ *	Database Configuration for Test Unit Case
  *	
  *	Define database engine and some configurations ...
  *	This configuration are designed specially for sequelize
@@ -24,7 +24,7 @@ conf.sqlite = {
 	database: "nodoovent",
 	username: "zeitungen",
 	password: "secret",
-	storage: path.join ( __dirname, "../nodoovent.sqlite" )
+	storage: ":memory:" //path.join ( __dirname, "../../test/test.sqlite" )
 };
 conf.sqlite.conf = {
 	dialect: "sqlite",

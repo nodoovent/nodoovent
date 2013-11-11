@@ -1,4 +1,4 @@
-module.exports = function ( sequelize, model ) {
+module.exports = function ( sequelize, model, chainer ) {
 
 	// model for auth
 	var DevelopperAccount = require ( "./developperaccount" ) ( sequelize );
@@ -19,11 +19,11 @@ module.exports = function ( sequelize, model ) {
 
 
 	// sync
-	DevelopperAccount.sync ( );
-	OAuth1AccessToken.sync ( );
-	OAuth1Client.sync ( );
-	OAuth1RequestToken.sync ( );
-	Permission.sync ( );
+	chainer.run ( DevelopperAccount.sync ( ) );
+	chainer.run ( OAuth1AccessToken.sync ( ) );
+	chainer.run ( OAuth1Client.sync ( ) );
+	chainer.run ( OAuth1RequestToken.sync ( ) );
+	chainer.run ( Permission.sync ( ) );
 
 	model.oauth = { DevelopperAccount: DevelopperAccount, OAuth1AccessToken: OAuth1AccessToken, OAuth1Client: OAuth1Client,
 					OAuth1RequestToken: OAuth1RequestToken, Permission: Permission };
