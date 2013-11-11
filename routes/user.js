@@ -6,6 +6,8 @@ module.exports = function ( model, auth, action ) {
 	self.action = action;
 
 	self.routes = {
+		
+		// use to manipulate the authenticate user
 		"/user": {
 			"GET": self.action.user.get,
 			"POST": self.action.user.create,
@@ -13,25 +15,25 @@ module.exports = function ( model, auth, action ) {
 			"DELETE": self.action.user.delete		
 		},
 
+		// search on all users
 		"/users": {
 			"GET": self.action.user.list
 		},
 
-		"/user/:userid": {
+		// get one user
+		"/users/:userid": {
 			"GET": self.action.user.getById
 		},
 
-		"/contact": {
-			"POST": self.action.user.addContact
+		// contacts of authenticate user
+		"/contacts": {
+			"POST": self.action.user.addContact,
+			"GET": self.action.user.contactList
 		},
 
-		"/contact/:id": {
+		"/contacts/:id": {
 			"DELETE": self.action.user.deleteContact,
 			"GET": self.action.user.getContact
-		},
-
-		"/contacts": {
-			"GET": self.action.user.contactList
 		}
 
 	}

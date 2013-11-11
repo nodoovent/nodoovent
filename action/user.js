@@ -45,14 +45,14 @@ module.exports = function ( model, auth ) {
 	self.update = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			if ( req.param ( "firstName") )
-				req.user.firstName = req.param ( "firstName");
-			if ( req.param ( "lastName") )
-				req.user.lastName = req.param ( "lastName");
-			if ( req.param ( "email") )
-				req.user.email = req.param ( "email");
-			if ( req.param ( "password") )
-				req.user.firstName = req.param ( "password");
+			if ( req.param ( "firstName" ) )
+				req.user.firstName = req.param ( "firstName" );
+			if ( req.param ( "lastName" ) )
+				req.user.lastName = req.param ( "lastName" );
+			if ( req.param ( "email" ) )
+				req.user.email = req.param ( "email" );
+			if ( req.param ( "password" ) )
+				req.user.password = req.param ( "password" );
 
 			var query = req.user.save ( );
 			query.success ( function ( user ) { res.send ( user ); } )
@@ -69,6 +69,7 @@ module.exports = function ( model, auth ) {
 		};
 		var query = self.model.User.create ( newuser );
 		query.success ( function ( user ) { res.send ( user ); } );
+		query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
 	}
 
 	self.delete = [
