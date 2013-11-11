@@ -1,7 +1,5 @@
 var passport = require ( "passport" );
 
-var oauth1tokenstrategy = require ( "../auth/oauth1tokenstrategy" ).name;
-
 
 module.exports = function ( model, auth ) {
 	var self = this;
