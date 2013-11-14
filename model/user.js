@@ -21,11 +21,17 @@ module.exports = function ( sequelize ) {
 			login: {
 				type: Sequelize.STRING,
 				unique: true,
-				allowNull: false
+				allowNull: false,
+				validate: {
+					notEmpty: true
+				}
 			},
 			password: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
+				validate: {
+					notEmpty: true
+				}
 			},
 			email: {
 				type: Sequelize.STRING,
