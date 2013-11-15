@@ -22,25 +22,6 @@ var addDevAccountAndClient = function ( nodoovent, callback ) {
 	} );
 };
 
-var addUserAndOAuth1AccessToken = function ( nodoovent, callback ) {
-	// create a test user and add an oauth1 access token
-	var sherlock = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "adler" };
-	var model = nodoovent.model;
-	model.User.create ( sherlock )
-	.error ( function ( err ) { callback ( err ); } )
-	.success ( function ( user ) {
-		model.oauth.OAuth1Client.find ( 1 )
-		.error ( function ( err ) { callback ( err ); } )
-		.success ( function ( client ) {
-			accessToken = { accessToken: "kLUnEv8dDGeIIbhH", accessSecret: "0LCtCYQZSTJ0DyOzdif4GpZwGmFjAev2ocTpF38EouzvdLJKQy3x32ZwSVCPSFzi", UserId: user.id, OAuth1ClientId: client.id };
-			model.oauth.OAuth1AccessToken.create ( accessToken  )
-			.error ( function ( err ) { callback ( err ); } )
-			.success ( function ( accessToken ) { callback ( ); } );
-		} );
-	} );
-}
-
-
 describe ( "[Nodoovent API Unit Test]", function ( ) {
 
 	var nodoovent = null;
@@ -56,10 +37,7 @@ describe ( "[Nodoovent API Unit Test]", function ( ) {
 		nodoovent = new Nodoovent ( function ( err ) {
 			if ( err ) return callback ( err );
 			_user.nodoovent = nodoovent;
-			addDevAccountAndClient ( nodoovent, function ( err ) {
-				if ( err ) return callback ( err );
-				addUserAndOAuth1AccessToken ( nodoovent, callback );
-			} );
+			addDevAccountAndClient ( nodoovent, callback );
 		} );
 	} );
 

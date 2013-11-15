@@ -1,12 +1,29 @@
 var should = require ( "should" );
 var request = require ( "supertest" );
 var OAuth = require ( "oauth" ).OAuth;
+var uid = require ( "../utils" ).uid;
 
 module.exports = function ( url ) {
 	this.url = url;
 	this.nodoovent = null;
-	this.oauth1client = null;
-	this.oauth1accesstoken = null;
+
+	this.addUserAndOAuth1AccessToken = function ( sherlock, callback ) {
+		// create a test user and add an oauth1 access token
+		var model = this.nodoovent.model;
+		model.User.create ( sherlock )
+		.error ( function ( err ) { callback ( err ); } )
+		.success ( function ( user ) {
+			model.oauth.OAuth1Client.find ( 1 )
+			.error ( function ( err ) { callback ( err ); } )
+			.success ( function ( client ) {
+				accessToken = { accessToken: uid ( 8 ), accessSecret: uid ( 32 ), UserId: user.id, OAuth1ClientId: client.id };
+				model.oauth.OAuth1AccessToken.create ( accessToken  )
+				.error ( function ( err ) { callback ( err ); } )
+				.success ( function ( accessToken ) { callback ( user, client, accessToken ); } );
+			} );
+		} );
+	}
+
 }
 
 module.exports.prototype.test = function ( ) {
@@ -16,26 +33,17 @@ module.exports.prototype.test = function ( ) {
 	describe ( "Test /user end points:", function ( ) {
 
 		var sherlock = null;
+		var oauth1accesstoken = null;
+		var oauth1client = null;
 
 		before ( function ( callback ) {
-			// create a test user and add an oauth1 access token
-			var model = self.nodoovent.model;
-			model.oauth.OAuth1AccessToken.find ( 1 )
-				.error ( function ( err ) { callback ( err ); } )
-				.success ( function ( token ) {
-					self.oauth1accesstoken = token;
-					model.oauth.OAuth1Client.find ( token.OAuth1ClientId )
-						.error ( function ( err ) { callback ( err ); } )
-						.success ( function ( client ) {
-							self.oauth1client = client;
-							model.User.find ( token.UserId )
-								.error ( function ( err ) { callback ( err ); } )
-								.success ( function ( user ) {
-									sherlock = user;
-									callback ( );
-								} );
-						} );
-				} );
+			var user = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "adler" };
+			self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+				sherlock = user;
+				oauth1client = client;
+				oauth1accesstoken = accessToken;
+				callback ( );
+			} );
 		} );
 
 		describe ( "POST /user end point", function ( ) {
@@ -179,9 +187,9 @@ module.exports.prototype.test = function ( ) {
 			var accesssecret = "";
 
 			before ( function ( ) {
-				oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  self.oauth1client.consumerKey, self.oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
-				accesstoken = self.oauth1accesstoken.accessToken;
-				accesssecret = self.oauth1accesstoken.accessSecret;
+				oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+				accesstoken = oauth1accesstoken.accessToken;
+				accesssecret = oauth1accesstoken.accessSecret;
 			} );
 
 			describe ( "GET /user with oauth1 authentication", function ( ) {
@@ -425,7 +433,84 @@ module.exports.prototype.test = function ( ) {
 						} );
 					} );
 
-				} );				
+				} );
+
+				describe ( "[should not works]", function ( ) {
+
+					it ( "should not update user with an empty password", function ( callback ) {
+						var user = { password: "" };
+						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+							if ( err ) return callback ( err );
+							res.should.have.status ( 200 );
+							data = JSON.parse ( data );
+							data.should.have.property ( "result", "error" );
+							data.should.have.property ( "error" );
+							callback ( );
+						} );
+					} );
+
+					it ( "should not update user with an empty address mail", function ( callback ) {
+						var user = { email: "" };
+						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+							if ( err ) return callback ( err );
+							res.should.have.status ( 200 );
+							data = JSON.parse ( data );
+							data.should.have.property ( "result", "error" );
+							data.should.have.property ( "error" );
+							callback ( );
+						} );
+					} );
+
+					it ( "should not update user with a not valid address mail", function ( callback ) {
+						var user = { email: "sdfshqh5654rfq6z4gqfg5" };
+						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+							if ( err ) return callback ( err );
+							res.should.have.status ( 200 );
+							data = JSON.parse ( data );
+							data.should.have.property ( "result", "error" );
+							data.should.have.property ( "error" );
+							callback ( );
+						} );
+					} );
+
+				} );			
+
+			} );
+
+			describe ( "DELETE /user with an oauth1 authentication", function ( ) {
+				
+				var delusr = null;
+				var delaccesstoken = null;
+				var delaccesssecret = null;
+				var deloauth = null;
+
+				before ( function ( callback ) {
+					var user = { firstName: "Alain", lastName: "Bashung", login: "bleupetrole", email: "alain.bashung@musicgenius.com", password: "gaby" };
+					self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+						delusr = user;
+						delaccesstoken = accessToken.accessToken;
+						delaccesssecret = accessToken.accessSecret;
+						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+						callback ( );
+					} );
+				} );
+
+				it ( "should DELETE /user with an oauth1 authentication and delete the current user authenticate", function ( callback ) {
+					oauth.delete ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 200 );
+						data = JSON.parse ( data );
+						data.should.have.property ( "result", "ok" );
+						callback ( );
+					} );
+				} );
+
+				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
+					// oauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
+					// 	res.should.have.status ( 401 );
+					// 	callback ( );
+					// } );
+				} );
 
 			} );
 
