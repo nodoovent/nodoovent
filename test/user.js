@@ -115,6 +115,18 @@ module.exports.prototype.test = function ( ) {
 				} );
 			} );
 
+			it ( "should not add user with an empty address mail", function ( callback ) {
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "", password: "doe" };
+				var req = request ( url ).post ( "/user" ).send ( jackDoe );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 200 );
+					res.body.should.have.property ( "result", "error" );
+					res.body.should.have.property ( "error" );
+					callback ( );
+				} );
+			} );
+
 			it ( "should not add user without an address mail", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", password: "doe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
