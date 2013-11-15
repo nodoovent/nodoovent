@@ -49,13 +49,14 @@ module.exports = function ( model, auth ) {
 				req.user.firstName = req.param ( "firstName" );
 			if ( req.param ( "lastName" ) )
 				req.user.lastName = req.param ( "lastName" );
-			if ( req.param ( "email" ) )
+			if ( req.param ( "email" ) || req.param ( "email" ) == "" )
 				req.user.email = req.param ( "email" );
-			if ( req.param ( "password" ) )
+			if ( req.param ( "password" ) || req.param ( "password" ) == "" )
 				req.user.password = req.param ( "password" );
 
 			var query = req.user.save ( );
 			query.success ( function ( user ) { res.send ( user ); } )
+			query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
 		}
 	];
 
