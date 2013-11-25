@@ -16,14 +16,22 @@ module.exports = function ( url ) {
 			model.oauth.OAuth1Client.find ( 1 )
 			.error ( function ( err ) { callback ( err ); } )
 			.success ( function ( client ) {
-				accessToken = { accessToken: uid ( 8 ), accessSecret: uid ( 32 ), UserId: user.id, OAuth1ClientId: client.id };
+				accessToken = { accessToken: uid ( 16 ), accessSecret: uid ( 32 )/*, UserId: user.id, OAuth1ClientId: client.id*/ };
 				model.oauth.OAuth1AccessToken.create ( accessToken  )
 				.error ( function ( err ) { callback ( err ); } )
-				.success ( function ( accessToken ) { callback ( user, client, accessToken ); } );
+				.success ( function ( accessToken ) { 
+					client.addOAuth1AccessToken ( accessToken )
+					.error ( function ( err ) { callback ( err ); } )
+					.success ( function ( accessToken ) {
+						user.addOAuth1AccessToken ( accessToken )
+						.error ( function ( err ) { callback ( err ); } )
+						.success ( function ( accessToken ) { callback ( user, client, accessToken ); } );
+					} );
+				} );
 			} );
 		} );
 	}
-
+	
 }
 
 module.exports.prototype.test = function ( ) {
@@ -496,7 +504,7 @@ module.exports.prototype.test = function ( ) {
 				} );
 
 				it ( "should DELETE /user with an oauth1 authentication and delete the current user authenticate", function ( callback ) {
-					oauth.delete ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
+					deloauth.delete ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
 						data = JSON.parse ( data );
@@ -506,10 +514,10 @@ module.exports.prototype.test = function ( ) {
 				} );
 
 				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
-					// oauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
-					// 	res.should.have.status ( 401 );
-					// 	callback ( );
-					// } );
+					deloauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
+						res.should.have.status ( 401 );
+						callback ( );
+					} );
 				} );
 
 			} );
