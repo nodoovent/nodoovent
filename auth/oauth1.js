@@ -47,7 +47,7 @@ module.exports = function ( model ) {
 				callbackUrl: callbackURL,
 				timeout: new Date ( ).getTime ( ) + duration
 			} );
-			query.error ( function ( err ) { console.log ( err ); return callback ( err ); } );
+			query.error ( function ( err ) { return callback ( err ); } );
 			query.success ( function ( requestToken ) {
 				// add requestToken to client
 				var query = client.addOAuth1RequestToken ( requestToken );
@@ -83,20 +83,22 @@ module.exports = function ( model ) {
 				query.error ( function ( err ) { callback ( err ); } );
 				query.success ( function ( access ) {
 					// add access token to client
-					client.addOAuth1AccessToken ( access ).error ( function ( err ) { callback ( err ); } );
-
-					// find client
-					var query = self.model.User.find ( { where: { id: token.UserId } } );
+					var query = client.addOAuth1AccessToken ( access );
 					query.error ( function ( err ) { callback ( err ); } );
-					query.success ( function ( user ) {
-						// add access token to user
-						var query = user.addOAuth1AccessToken ( access );
+					query.success ( function ( access ) {
+						// find client
+						var query = self.model.User.find ( { where: { id: token.UserId } } );
 						query.error ( function ( err ) { callback ( err ); } );
-						query.success ( function ( access ) { 
-							// remove requestToken
-							var query = token.destroy ( );
+						query.success ( function ( user ) {
+							// add access token to user
+							var query = user.addOAuth1AccessToken ( access );
 							query.error ( function ( err ) { callback ( err ); } );
-							query.success ( function ( ) { callback ( null, access.accessToken, access.accessSecret ); } );
+							query.success ( function ( access ) { 
+								// remove requestToken
+								var query = token.destroy ( );
+								query.error ( function ( err ) { callback ( err ); } );
+								query.success ( function ( ) { callback ( null, access.accessToken, access.accessSecret ); } );
+							} );
 						} );
 					} );
 				} );
