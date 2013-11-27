@@ -3,58 +3,25 @@
  *
  *
  */
+ 
+module.exports = function ( schema ) {
 
-
-var Sequelize = require ( "Sequelize" );
-
-module.exports = function ( sequelize ) {
-
-	return sequelize.define ( 
-		"User", 
+	var User = schema.define ( 
+		"User",
 		{
-			firstName: {
-				type: Sequelize.STRING // = Sequelize.STRING(255) 
-			},
-			lastName: {
-				type: Sequelize.STRING
-			},
-			login: {
-				type: Sequelize.STRING,
-				unique: true,
-				allowNull: false,
-				validate: {
-					notEmpty: true
-				}
-			},
-			password: {
-				type: Sequelize.STRING,
-				allowNull: false,
-				validate: {
-					notEmpty: true
-				}
-			},
-			email: {
-				type: Sequelize.STRING,
-				validate: {
-					isEmail: true
-				}
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: {
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						firstName: this.firstName,
-						lastName: this.lastName,
-						login: this.login,
-						email: this.email
-					};
-				}
-			}
+			firstName: { type: String },
+			lastName: { type: String },
+			login: { type: String },
+			password: { type: String },
+			email: { type: String },
+			createdAt: { type: Date, default: function ( ) { return new Date; } }
 		}
 	);
+
+	User.validatesPresenceOf ( "login", "password", "email" );
+	User.validatesUniquenessOf ( "email", { message: "email is not unique" } );
+	User.validatesUniquenessOf ( "login", { message: "login is not unique" } );
+
+	return User;
 
 }
