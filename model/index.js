@@ -16,7 +16,12 @@ module.exports.init = function ( conf, callback ) {
 	// var TodosList = require ( "./todolist" ) ( schema );
 	var User = require ( "./user" ) ( schema );
 
+	// Associations for Nodoovent
+	// User.hasAndBelongsToMany ( User, { as: "contacts" } );
 
+
+	// add authentication models
+	schema = require ( "./oauth" ) ( schema );
 
 
 	schema.autoupdate ( function ( err ) {

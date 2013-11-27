@@ -1,48 +1,20 @@
-var Sequelize = require ( "Sequelize" );
+module.exports = function ( schema ) {
 
-module.exports = function ( sequelize ) {
-
-	return sequelize.define (
+	var DevelopperAccount = schema.define ( 
 		"DevelopperAccount",
 		{
-			firstName: {
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			lastName: {
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			organization: {
-				type: Sequelize.STRING
-			},
-			email: {
-				type: Sequelize.STRING,
-				unique: true,
-				validate: {
-					isEmail: true
-				}
-			},
-			password: {
-				type: Sequelize.STRING,
-				allowNull: false
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: {
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						firstName: this.firstName,
-						lastName: this.lastName,
-						organization: this.organization,
-						email: this.email
-					};
-				}
-			}
+			firstName: { type: String },
+			lastName: { type: String },
+			organizationName: { type: String },
+			email: { type: String },
+			password: { type: String },
+			createdAt: { type: Date, default: function ( ) { return new Date; } }
 		}
-	)
+	);
+
+	DevelopperAccount.validatesPresenceOf ( "password", "email" );
+	DevelopperAccount.validatesUniquenessOf ( "email", { message: "email is not unique" } );
+
+	return DevelopperAccount;
 
 }
