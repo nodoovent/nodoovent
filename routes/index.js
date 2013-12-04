@@ -1,4 +1,4 @@
-var _ = require ( "Sequelize" ).Utils._; // (get lodash module)
+var _ = require ( "lodash" );
 
 var privacy = require ( "./privacy" );
 var status = require ( "./status" );
