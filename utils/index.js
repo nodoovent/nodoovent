@@ -1,5 +1,6 @@
 module.exports = {
 
-	uid: require ( "./uid" )
+	uid: require ( "./uid" ),
+	QueryChainer: require ( "./jugglingdb-querychainer" )
 
 }
