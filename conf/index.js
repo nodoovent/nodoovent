@@ -8,5 +8,6 @@ module.exports = function ( mode ) {
 		conf.db = require ( "./db" );
 	}
 
+	conf.privacies = [ "Public", "Private" ];
 	return conf;
 };
