@@ -7,11 +7,11 @@ var path = require ( "path" );
 var passport = require ( "passport" );
 
 var conf = require ( "./conf" );
-// var routebuilder = require ( "./routebuilder" );
-// var routes = require ( "./routes" );
+var routebuilder = require ( "./routebuilder" );
+var routes = require ( "./routes" );
 var model = require ( "./model" );
 var auth = require ( "./auth" );
-// var action = require ( "./action" );
+var action = require ( "./action" );
 
 module.exports = function ( callback ) {
 
@@ -46,20 +46,20 @@ module.exports = function ( callback ) {
 	var _conf = conf ( app.get ( "env" ) );
 
 	// init model
-	var _model = model.init ( _conf.db, callback );
+	var _model = model.init ( _conf, callback );
 
 	// init authentification
 	var _auth = new auth ( _model );
 
 
 	// init actions
-	// var _action = new action ( _model, _auth );
+	var _action = new action ( _model, _auth );
 
 	// init routes
-	// var _routes = new routes ( _model, _auth, _action )
+	var _routes = new routes ( _model, _auth, _action )
 
 	// build routes
-	// routebuilder ( app, _routes.routes );
+	routebuilder ( app, _routes.routes );
 
 	// require ( "./datas" ) ( _model );
 
@@ -67,8 +67,8 @@ module.exports = function ( callback ) {
 	this.app = app;
 	this.conf = _conf;
 	this.model = _model;
-	// this.auth = _auth;
-	// this.actions = _action;
-	// this.routes = _routes;
+	this.auth = _auth;
+	this.actions = _action;
+	this.routes = _routes;
 
 };
