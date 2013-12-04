@@ -1,19 +1,20 @@
-module.exports = function ( model, auth ) {
+module.exports = function ( schema, auth ) {
 	var self = this;
 
-	self.model = model;
-	self.auth = auth;
+	var Status = schema.models.Status;
 
 	self.list = function ( req, res ) {
-		var query = self.model.Status.all ( );
-		query.success ( function ( status ) { res.send ( status ); } );
+		Status.all ( function ( err, status ) {
+			if ( err ) return res.send ( { message: "error", error: err } );
+			res.send ( status );
+		} );
 	}
 
 	self.getbyId = function ( req, res ) {
-		var query = self.model.Status.find ( req.param ( 0 ) );
-		query.success ( function ( status ) { 
-			if ( status ) res.send ( status );
-			else res.status ( 404 ).send ( );
+		Status.find ( req.param ( "id" ), function ( err, status ) {
+			if ( err ) return res.send ( { message: "error", error: err } );
+			if ( !status ) res.status ( 404 ).send ( );
+			res.send ( status );
 		} );
 	}
 	

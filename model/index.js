@@ -11,8 +11,8 @@ module.exports.init = function ( conf, callback ) {
 	// Models for Nodoovent
 	// var Comment = require ( "./comment" ) ( schema );
 	// var Group = require ( "./group" ) ( schema );
-	// var Status = require ( "./status" ) ( schema );
 	var Privacy = require ( "./privacy" ) ( schema, conf );
+	var Status = require ( "./status" ) ( schema, conf );
 	// var Tag = require ( "./tag" ) ( schema );
 	// var Todo = require ( "./todo" ) ( schema );
 	// var TodosList = require ( "./todolist" ) ( schema );
@@ -27,6 +27,8 @@ module.exports.init = function ( conf, callback ) {
 
 
 	for ( var i = 0; i < conf.privacies.length; i++ ) chainer.add ( Privacy, "create", { name: conf.privacies[i], id: i + 1 } );
+	for ( var i = 0; i < conf.status.length; i++ ) chainer.add ( Status, "create", { status: conf.status[i], id: i + 1 } );
+
 	schema.autoupdate ( function ( err ) {
 		if ( err ) return callback ( err );
 		chainer.run ( function ( errors ) {

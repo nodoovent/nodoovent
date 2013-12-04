@@ -10,7 +10,7 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.status.list
 		},
 
-		"regexp \/status\/([0-9]+)": {
+		"/status/:id": {
 			"GET": self.action.status.getbyId
 		}
 	}
