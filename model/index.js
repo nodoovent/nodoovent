@@ -25,14 +25,23 @@ module.exports.init = function ( conf, callback ) {
 	// add authentication models
 	schema = require ( "./oauth" ) ( schema );
 
-
-	for ( var i = 0; i < conf.privacies.length; i++ ) chainer.add ( Privacy, "create", { name: conf.privacies[i], id: i + 1 } );
-	for ( var i = 0; i < conf.status.length; i++ ) chainer.add ( Status, "create", { status: conf.status[i], id: i + 1 } );
-
 	schema.autoupdate ( function ( err ) {
 		if ( err ) return callback ( err );
-		chainer.run ( function ( errors ) {
-			callback ( errors );
+		var countchainer = new QueryChainer ( );
+		countchainer.add ( Privacy, "count", null, function ( err, count ) {
+			if ( err ) return;
+			if ( count == 0 ) 
+				for ( var i = 0; i < conf.privacies.length; i++ ) chainer.add ( Privacy, "create", { name: conf.privacies[i], id: i + 1 } );
+		} );
+		countchainer.add ( Status, "count", null, function ( err, count ) {
+			if ( err ) return;
+			if ( count == 0 )
+				for ( var i = 0; i < conf.status.length; i++ ) chainer.add ( Status, "create", { status: conf.status[i], id: i + 1 } );
+		} );
+		countchainer.run ( function ( errors ) {
+			chainer.run ( function ( errors ) {
+				callback ( errors );
+			} );
 		} );
 	} );
 
