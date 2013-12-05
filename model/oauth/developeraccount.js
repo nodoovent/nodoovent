@@ -1,6 +1,6 @@
 module.exports = function ( schema ) {
 
-	var DevelopperAccount = schema.define ( 
+	var DeveloperAccount = schema.define ( 
 		"DevelopperAccount",
 		{
 			firstName: { type: String },
@@ -12,9 +12,9 @@ module.exports = function ( schema ) {
 		}
 	);
 
-	DevelopperAccount.validatesPresenceOf ( "password", "email" );
-	DevelopperAccount.validatesUniquenessOf ( "email", { message: "email is not unique" } );
+	DeveloperAccount.validatesPresenceOf ( "password", "email" );
+	DeveloperAccount.validatesUniquenessOf ( "email", { message: "email is not unique" } );
 
-	return DevelopperAccount;
+	return DeveloperAccount;
 
 }
