@@ -1,7 +1,7 @@
 module.exports = function ( schema ) {
 
 	var DeveloperAccount = schema.define ( 
-		"DevelopperAccount",
+		"DeveloperAccount",
 		{
 			firstName: { type: String },
 			lastName: { type: String },
