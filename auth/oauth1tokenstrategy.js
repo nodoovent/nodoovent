@@ -40,7 +40,7 @@ module.exports.init = function ( schema ) {
 				if ( tokens.length > 1 ) return callback ( "Many OAuth1 access tokens, it's weird !" );
 				if ( tokens.length == 0 ) return callback ( "No OAuth1 accss token found" );
 				var token = tokens[0];
-				User.find ( token.user, function ( err, callback ) {
+				User.find ( token.user, function ( err, user ) {
 					if ( err ) return callback ( err );
 					if ( !user ) return callback ( "No user found" );
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission model)

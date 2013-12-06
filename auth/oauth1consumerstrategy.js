@@ -33,7 +33,7 @@ module.exports.init = function ( schema ) {
 		 *	Finds a request token, for get an access token
 		 */
 		function ( requestToken, callback ) {
-			OAuth1RequestToken.all ( { where: { requestToken: requestToken } }, function ( err, tokens ) {
+			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
 				if ( err ) return callback ( err );
 				if ( tokens.length > 1 ) return callback ( "Many OAuth1 request tokens with the same token are found, it's weird !" );
 				if ( tokens.length == 0 ) return callback ( "No OAut1 request token are found" );

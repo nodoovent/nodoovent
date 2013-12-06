@@ -47,7 +47,7 @@ module.exports = function ( schema ) {
 			var secret = utils.uid ( 32 );		
 
 			// build OAuth1RequestToken
-			var requesttoken = { token: token, secret: secret, callbackUrl: callbackUrl, timeout: new Date ( ).getTime ( ) + duration, client: client.id };
+			var requesttoken = { token: token, secret: secret, callbackUrl: callbackURL, timeout: new Date ( ).getTime ( ) + duration, client: client.id };
 			OAuth1RequestToken.create ( requesttoken, function ( err, requesttoken ) {
 				if ( err ) return callback ( err );
 				callback ( null, token, secret );
@@ -66,7 +66,7 @@ module.exports = function ( schema ) {
 		passport.authenticate ( OAuth1ConsumerStrategy.name, { session: false } ),
 		self.oauth1server.accessToken (
 			function ( requestToken, verifier, token, callback ) {
-				if ( verifier != requestToken.verifier && requestToken != token.requestToken ) callback ( null, false );
+				if ( verifier != requestToken.verifier && requestToken != token.token ) callback ( null, false );
 				callback ( null, true );
 			},
 			function ( client, requestToken, token, callback ) {
@@ -102,7 +102,7 @@ module.exports = function ( schema ) {
 			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
 				if ( err ) return callback ( err );
 				if ( tokens.length == 0 ) return callback ( "No OAuth1RequestToken found with token=" + requestToken );
-				if ( tokens.length > 0 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
+				if ( tokens.length > 1 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
 				var token = tokens[0];
 				OAuth1Client.find ( token.client, function ( err, client ) {
 					if ( err ) return callback ( err );
@@ -124,10 +124,10 @@ module.exports = function ( schema ) {
 		login.ensureLoggedIn ( ), // redirect to connect view (I think :D)
 		self.oauth1server.userDecision ( function ( requestToken, user, res, callback ) {
 			// get requestToken
-			OAuth1RequestToken.all ( { where: { requestToken: requestToken } }, function ( err, tokens ) {
+			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
 				if ( err ) return callback ( err );
 				if ( tokens.length == 0 ) return callback ( "No OAuth1RequestToken found with token=" + requestToken );
-				if ( tokens.length > 0 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
+				if ( tokens.length > 1 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
 				var token = tokens[0];
 				// update values
 				token.verifier = utils.uid ( 8 );
