@@ -7,26 +7,18 @@ module.exports = function ( url ) {
 	this.url = url;
 	this.nodoovent = null;
 
-	this.addUserAndOAuth1AccessToken = function ( sherlock, callback ) {
+	this.addUserAndOAuth1AccessToken = function ( user, callback ) {
+		var models = this.nodoovent.schema.models;
 		// create a test user and add an oauth1 access token
-		var model = this.nodoovent.model;
-		model.User.create ( sherlock )
-		.error ( function ( err ) { callback ( err ); } )
-		.success ( function ( user ) {
-			model.oauth.OAuth1Client.find ( 1 )
-			.error ( function ( err ) { callback ( err ); } )
-			.success ( function ( client ) {
-				accessToken = { accessToken: uid ( 16 ), accessSecret: uid ( 32 )/*, UserId: user.id, OAuth1ClientId: client.id*/ };
-				model.oauth.OAuth1AccessToken.create ( accessToken  )
-				.error ( function ( err ) { callback ( err ); } )
-				.success ( function ( accessToken ) { 
-					client.addOAuth1AccessToken ( accessToken )
-					.error ( function ( err ) { callback ( err ); } )
-					.success ( function ( accessToken ) {
-						user.addOAuth1AccessToken ( accessToken )
-						.error ( function ( err ) { callback ( err ); } )
-						.success ( function ( accessToken ) { callback ( user, client, accessToken ); } );
-					} );
+		models.User.create ( user, function ( err, scherlock ) {
+			if ( err ) return calback ( err )
+			models.OAuth1Client.find ( 1, function ( err, client ) {
+				if ( err ) return callback ( err );
+				if ( !client ) return callback ( "No Client found" );
+				var token = { token: uid ( 16 ), secret: uid ( 32 ), client: client.id, user: user.id };
+				models.OAuth1AccessToken.create ( token, function ( err, token ) {
+					if ( err ) return callback ( err );
+					callback ( null, user, client, token );
 				} );
 			} );
 		} );
@@ -46,7 +38,8 @@ module.exports.prototype.test = function ( ) {
 
 		before ( function ( callback ) {
 			var user = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "adler" };
-			self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+			self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+				if ( err ) return callback ( err );
 				sherlock = user;
 				oauth1client = client;
 				oauth1accesstoken = accessToken;

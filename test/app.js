@@ -11,13 +11,13 @@ var URL = "http://localhost:3000";
 
 
 var addDevAccountAndClient = function ( nodoovent, callback ) {
-	nodoovent.model.oauth.DevelopperAccount.create ( { firstName: "Maxime", lastName: "Journaux", email: "journaux.maxime@gmail.com", password: "max" } )
-	.error ( function ( err ) { callback ( err ); } )
-	.success ( function ( dev ) {
-		nodoovent.model.oauth.OAuth1Client.create ( { name: "Zeitungen", description: "Dev client for Zeitungen", consumerKey: "zeitungen", consumerSecret: "secret" } )
-		.error ( function ( err ) { callback ( err ); } )
-		.success ( function ( client ) {
-			dev.addOAuth1Client ( client ).success ( function ( client ) { callback ( ) } ).error ( function ( err ) { callback ( err ) } );
+	var dev = { firstName: "Maxime", lastName: "Journaux", email: "journaux.maxime@gmail.com", password: "max" };
+	nodoovent.schema.models.DeveloperAccount.create ( dev, function ( err, dev ) {
+		if ( err ) return callback ( err );
+		var client = { name: "Zeitungen", description: "Dev client for Zeitungen", consumerKey: "zeitungen", consumerSecret: "secret", developerAccount: dev.id }
+		nodoovent.schema.models.OAuth1Client.create ( client, function ( err, client ) {
+			if ( err ) return callback ( err );
+			callback ( );
 		} );
 	} );
 };
@@ -51,7 +51,7 @@ describe ( "[Nodoovent API Unit Test]", function ( ) {
 		it ( "should get Nodoovent instance", function ( ) {
 			nodoovent.should.have.property ( "app" );
 			nodoovent.should.have.property ( "conf" );
-			nodoovent.should.have.property ( "model" );
+			nodoovent.should.have.property ( "schema" );
 			nodoovent.should.have.property ( "auth" );
 			nodoovent.should.have.property ( "actions" );
 			nodoovent.should.have.property ( "routes" );
