@@ -44,7 +44,8 @@ module.exports = ( function ( ) {
 						}
 					} 
 				} ) ( operation.callback );
-				operation.klass[operation.method] ( operation.args, cb );
+				if ( operation.args ) operation.klass[operation.method] ( operation.args, cb );
+				else operation.klass[operation.method] ( cb );
 			} catch ( err ) {
 				self.operations.splice ( i, 1 );
 				i--;

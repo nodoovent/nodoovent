@@ -11,6 +11,8 @@ module.exports = function ( schema, auth ) {
 	self.auth = auth;
 
 	var User = schema.models.User;
+	var OAuth1RequestToken = schema.models.OAuth1RequestToken;
+	var OAuth1AccessToken = schema.models.OAuth1AccessToken;
 
 	self.get = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
@@ -76,9 +78,27 @@ module.exports = function ( schema, auth ) {
 	self.delete = [
 		passport.authenticate( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			req.user.destroy ( function ( err ) { // need to delete dependencies ..; (oauth tokens ...)
-				if ( err ) return res.send ( { result: "error", error: err } );
-				res.send ( { result: "ok" } );
+			var requesttokens = [ ];
+			var accesstokens = [ ];
+
+			var chainer = new QueryChainer ( );
+			chainer.add ( OAuth1RequestToken, "all", { where: { user: req.user.id } }, function ( err, tokens ) {
+				if ( err ) return;
+				requesttokens = tokens;
+			} );
+			chainer.add ( OAuth1AccessToken, "all", { where: { user: req.user.id } }, function ( err, tokens ) {
+				if ( err ) return;
+				accesstokens = tokens;
+			} );
+			chainer.run ( function ( errors ) {
+				var chainer = new QueryChainer ( );
+				for ( var i in requesttokens ) chainer.add ( requesttokens[i], "destroy" );
+				for ( var i in accesstokens ) chainer.add ( accesstokens[i], "destroy" );
+				chainer.add ( req.user, "destroy" );
+				chainer.run ( function ( errors ) {
+					if ( errors ) return res.send ( { result: "error", error: errors } );
+					res.send ( { result: "ok" } );
+				} );
 			} );
 		}
 	];

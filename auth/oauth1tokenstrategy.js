@@ -38,7 +38,7 @@ module.exports.init = function ( schema ) {
 			OAuth1AccessToken.all (  { where: { token: accessToken } }, function ( err, tokens ) {
 				if ( err ) return callback ( err );
 				if ( tokens.length > 1 ) return callback ( "Many OAuth1 access tokens, it's weird !" );
-				if ( tokens.length == 0 ) return callback ( "No OAuth1 accss token found" );
+				if ( tokens.length == 0 ) return callback ( );
 				var token = tokens[0];
 				User.find ( token.user, function ( err, user ) {
 					if ( err ) return callback ( err );
