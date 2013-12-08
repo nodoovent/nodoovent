@@ -3,6 +3,8 @@
  *
  *
  */
+
+var validateEmail = require ( "../utils" ).validateEmail;
  
 module.exports = function ( schema ) {
 
@@ -21,6 +23,22 @@ module.exports = function ( schema ) {
 	User.validatesPresenceOf ( "login", "password", "email" );
 	User.validatesUniquenessOf ( "email", { message: "email is not unique" } );
 	User.validatesUniquenessOf ( "login", { message: "login is not unique" } );
+
+	var validateUserEmail = function ( callbackerr ) {
+		if ( !validateEmail ( this.email ) ) return callbackerr ( );
+	};
+
+	User.validate ( "email", validateUserEmail, { message: "email not valid" } );
+
+	User.toJSON = function ( ) {
+		return {
+			firstName: this.firstName,
+			lastName: this.lastName,
+			login: this.login,
+			email: this.email,
+			createdAt: this.createdAt
+		}
+	}
 
 	return User;
 

@@ -10,8 +10,8 @@ module.exports = function ( url ) {
 	this.addUserAndOAuth1AccessToken = function ( user, callback ) {
 		var models = this.nodoovent.schema.models;
 		// create a test user and add an oauth1 access token
-		models.User.create ( user, function ( err, scherlock ) {
-			if ( err ) return calback ( err )
+		models.User.create ( user, function ( err, user ) {
+			if ( err ) return callback ( err )
 			models.OAuth1Client.find ( 1, function ( err, client ) {
 				if ( err ) return callback ( err );
 				if ( !client ) return callback ( "No Client found" );
@@ -189,8 +189,8 @@ module.exports.prototype.test = function ( ) {
 
 			before ( function ( ) {
 				oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
-				accesstoken = oauth1accesstoken.accessToken;
-				accesssecret = oauth1accesstoken.accessSecret;
+				accesstoken = oauth1accesstoken.token;
+				accesssecret = oauth1accesstoken.secret;
 			} );
 
 			describe ( "GET /user with oauth1 authentication", function ( ) {
@@ -216,12 +216,12 @@ module.exports.prototype.test = function ( ) {
 				describe ( "[should works]", function ( ) {
 
 					afterEach ( function ( callback ) {
-						self.nodoovent.model.User.find ( sherlock.id )
-							.error ( function ( err ) { callback ( err ); } )
-							.success ( function ( user ) {
-								sherlock = user;
-								callback ( );
-							} );
+						self.nodoovent.schema.models.User.find ( sherlock.id, function ( err, user ) {
+							if ( err ) return callback ( err );
+							if ( !user ) return callback ( "No user foud" );
+							sherlock = user;
+							callback ( );
+						} );
 					} );
 
 					it ( "should have PUT /user end point and update the user's firstName", function ( callback ) {
@@ -487,10 +487,11 @@ module.exports.prototype.test = function ( ) {
 
 				before ( function ( callback ) {
 					var user = { firstName: "Alain", lastName: "Bashung", login: "bleupetrole", email: "alain.bashung@musicgenius.com", password: "gaby" };
-					self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+					self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+						if ( err ) return callback ( err );
 						delusr = user;
-						delaccesstoken = accessToken.accessToken;
-						delaccesssecret = accessToken.accessSecret;
+						delaccesstoken = accessToken.token;
+						delaccesssecret = accessToken.secret;
 						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
 						callback ( );
 					} );
