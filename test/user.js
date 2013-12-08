@@ -509,7 +509,6 @@ module.exports.prototype.test = function ( ) {
 
 				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
 					deloauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
-						if ( err ) callback ( err );
 						res.should.have.status ( 401 );
 						callback ( );
 					} );
