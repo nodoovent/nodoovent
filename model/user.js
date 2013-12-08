@@ -30,8 +30,9 @@ module.exports = function ( schema ) {
 
 	User.validate ( "email", validateUserEmail, { message: "email not valid" } );
 
-	User.toJSON = function ( ) {
+	User.prototype.toJSON = function ( ) {
 		return {
+			id: this.id,
 			firstName: this.firstName,
 			lastName: this.lastName,
 			login: this.login,

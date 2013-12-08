@@ -205,6 +205,7 @@ module.exports.prototype.test = function ( ) {
 						data.should.have.property ( "firstName", sherlock.firstName );
 						data.should.have.property ( "lastName", sherlock.lastName );
 						data.should.have.property ( "email", sherlock.email );
+						data.should.not.have.property ( "password" );
 						callback ( );
 					} );
 				} );
