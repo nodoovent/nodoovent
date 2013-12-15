@@ -4,50 +4,21 @@
  *	An action to do ....
  */
 
-
-var Sequelize = require ( "Sequelize" );
-
-module.exports = function ( sequelize ) {
+module.exports = function ( schema ) {
 	
-	return sequelize.define (
+	var Todo = schema.define ( 
 		"Todo",
 		{
-			name: { 
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			description: {
-				type: Sequelize.STRING
-			},
-			dueDate: {
-				type: Sequelize.DATE 
-				/* we can use this instead :
-				type: Sequelize.STRING,
-				validate: {
-					isDate: true
-				}
-				*/
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: {
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						name: this.name,
-						description: this.description,
-						dueDate: this.dueDate,
-						createdAt: this.createdAt,
-						updatedAt: this.updatedAt,
-						author: this.UserId,
-						status: this.StatuId,
-						privacy: this.PrivacyId
-					};
-				}
-			}
+			name: { type: String },
+			description: { type: String },
+			dueAt: { type: Date },
+			createdAt: { type: Date, default: function ( ) { return new Date; } },
+			updatedAt: { type: Date, default: function ( ) { return new Date; } }
 		}
 	);
+
+	Todo.validatesPresenceOf ( "name", "createdAt", "updatedAt" );
+
+	return Todo;
 
 }

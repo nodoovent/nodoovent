@@ -14,12 +14,13 @@ module.exports.init = function ( conf, callback ) {
 	var Privacy = require ( "./privacy" ) ( schema, conf );
 	var Status = require ( "./status" ) ( schema, conf );
 	// var Tag = require ( "./tag" ) ( schema );
-	// var Todo = require ( "./todo" ) ( schema );
+	var Todo = require ( "./todo" ) ( schema );
 	// var TodosList = require ( "./todolist" ) ( schema );
 	var User = require ( "./user" ) ( schema );
 
 	// Associations for Nodoovent
 	// User.hasAndBelongsToMany ( User, { as: "contacts" } );
+	User.hasMany ( Todo, { as: "todos", foreignKey: "creator" } );
 
 
 	// add authentication models
