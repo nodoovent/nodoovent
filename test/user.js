@@ -54,7 +54,7 @@ module.exports.prototype.test = function ( ) {
 				var req = request ( url ).post ( "/user" ).send ( user );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
-					res.should.have.status ( 200 );
+					res.should.have.status ( 201 );
 					res.should.be.json;
 					res.body.should.have.property ( "id", 2 );
 					res.body.should.have.property ( "firstName", user.firstName );
