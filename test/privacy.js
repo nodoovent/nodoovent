@@ -19,6 +19,7 @@ module.exports.prototype.test = function ( ) {
 			req.end ( function ( err, res ) {
 				if ( err ) return callback ( err );
 				res.should.have.status ( 200 );
+				res.should.be.json;
 				res.body.should.be.an.instanceof ( Array );
 				for ( var i = 0; i < lprivacies; i++ ) {
 					res.body[i].should.have.property ( "id", i + 1 );
@@ -36,6 +37,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "id", i + 1 );
 					res.body.should.have.property ( "name", privacies[i] );
 					callback ( );

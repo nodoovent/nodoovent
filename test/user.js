@@ -55,6 +55,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "id", 2 );
 					res.body.should.have.property ( "firstName", user.firstName );
 					res.body.should.have.property ( "lastName", user.lastName );
@@ -70,6 +71,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -82,6 +84,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -94,6 +97,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -106,6 +110,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -118,6 +123,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -130,6 +136,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -142,6 +149,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -199,6 +207,7 @@ module.exports.prototype.test = function ( ) {
 					oauth.get ( url + "/user", accesstoken, accesssecret, function ( err, data, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
+						res.should.be.json;
 						data = JSON.parse ( data );
 						data.should.have.property ( "id", sherlock.id );
 						data.should.have.property ( "login", sherlock.login );
@@ -230,6 +239,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -245,6 +255,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -260,6 +271,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -275,6 +287,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -290,6 +303,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -305,6 +319,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -320,6 +335,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -335,6 +351,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -350,6 +367,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -365,6 +383,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -380,6 +399,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -395,6 +415,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -410,6 +431,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -425,6 +447,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -502,6 +525,7 @@ module.exports.prototype.test = function ( ) {
 					deloauth.delete ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
+						res.should.be.json;
 						data = JSON.parse ( data );
 						data.should.have.property ( "result", "ok" );
 						callback ( );
