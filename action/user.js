@@ -71,7 +71,7 @@ module.exports = function ( schema, auth ) {
 		};
 		User.create ( newuser, function ( err, user ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
-			res.send ( user );
+			res.status ( 201 ).send ( user );
 		} );
 	}
 
