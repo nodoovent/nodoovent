@@ -158,7 +158,7 @@ module.exports.prototype.test = function ( ) {
 
 		} );
 
-		describe ( "GET, UPDATE and DELETE /user need an authentication", function ( ) {
+		describe ( "/user, /users and /users/id need an authentication", function ( ) {
 
 			it ( "should have GET /user return 401 http code", function ( callback ) {
 				var req = request ( url ).get ( "/user" ).send ( );
@@ -187,9 +187,27 @@ module.exports.prototype.test = function ( ) {
 				} );
 			} );
 
+			it ( "should have GET /users return 401 http code", function ( callback ) {
+				var req = request ( url ).get ( "/users" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 401 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have GET /users/1 return 401 http code", function ( callback ) {
+				var req = request ( url ).get ( "/users/1" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 401 );
+					callback ( );
+				} );
+			} );
+
 		} );
 
-		describe ( "GET, UPDATE and DELETE /user end point with oauth1 authentication", function ( ) {		
+		describe ( "/user, /users and /users/id end point with oauth1 authentication", function ( ) {		
 
 			var oauth = null;
 			var accesstoken = "";
@@ -502,8 +520,8 @@ module.exports.prototype.test = function ( ) {
 
 			} );
 
-			describe ( "DELETE /user with an oauth1 authentication", function ( ) {
-				
+			 describe ( "DELETE /user with an oauth1 authentication", function ( ) {
+
 				var delusr = null;
 				var delaccesstoken = null;
 				var delaccesssecret = null;
@@ -516,7 +534,7 @@ module.exports.prototype.test = function ( ) {
 						delusr = user;
 						delaccesstoken = accessToken.token;
 						delaccesssecret = accessToken.secret;
-						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken", client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
 						callback ( );
 					} );
 				} );
@@ -535,6 +553,58 @@ module.exports.prototype.test = function ( ) {
 				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
 					deloauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						res.should.have.status ( 401 );
+						callback ( );
+					} );
+				} );
+
+			} );
+
+			describe ( "GET /users with an oauth1 authentication", function ( ) {
+
+				it ( "should have a GET /users endpoint and have a http status", function ( callback ) {
+					oauth.get ( url + "/users", accesstoken, accesssecret, function ( err, data, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 200 );
+						res.should.be.json;
+						data = JSON.parse ( data );
+						data.should.be.an.instanceof ( Array );
+						for ( var i in data ) {
+							var user = data[i];
+							user.should.have.property ( "id" );
+							user.should.have.property ( "login" );
+							user.should.have.property ( "firstName" );
+							user.should.have.property ( "lastName" );
+							user.should.have.property ( "email" );
+							user.should.not.have.property ( "password" );
+						}
+						callback ( );
+					} );
+				} );
+
+				var usercount = 2;
+				var testUserWithId = function ( i ) {
+					it ( "should have GET /users/" + ( i + 1 ) + " end point with oauth1 authentication", function ( callback ) {
+						oauth.get ( url + "/users/" + ( i + 1 ), accesstoken, accesssecret, function ( err, data, res ) {
+							if ( err ) return callback ( err );
+							res.should.have.status ( 200 );
+							res.should.be.json;
+							data = JSON.parse ( data );
+							data.should.have.property ( "id" );
+							data.should.have.property ( "login" );
+							data.should.have.property ( "firstName" );
+							data.should.have.property ( "lastName" );
+							data.should.have.property ( "email" );
+							data.should.not.have.property ( "password" );
+							callback ( );
+						} );
+					} );
+				}
+
+				for ( var i = 0; i < usercount; i++ ) testUserWithId ( i );
+
+				it ( "should not have GET /users/" + ( usercount + 1 ) + " end point with oauth1 authentication", function ( callback ) {
+					oauth.get ( url + "/users/" + ( usercount + 1 ), accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 404 );
 						callback ( );
 					} );
 				} );
