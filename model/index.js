@@ -21,6 +21,9 @@ module.exports.init = function ( conf, callback ) {
 	// Associations for Nodoovent
 	// User.hasAndBelongsToMany ( User, { as: "contacts" } );
 	User.hasMany ( Todo, { as: "todos", foreignKey: "creator" } );
+	Privacy.hasMany ( Todo, { as: "todos", foreignKey: "privacy" } );
+	Status.hasMany ( Todo, { as: "todos", foreignKey: "status" } );
+
 
 
 	// add authentication models
