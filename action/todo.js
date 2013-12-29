@@ -1,14 +1,15 @@
 var passport = require ( "passport" );
-var QueryChainer = require ( "Sequelize" ).Utils.QueryChainer;
 
 var oauth1tokenstrategy = require ( "../auth/oauth1tokenstrategy" ).name;
 
 
-module.exports = function ( model, auth ) {
+module.exports = function ( schema, auth ) {
 	var self = this;
 
-	self.model = model;
+	self.schema = schema;
 	self.auth = auth;
+
+	var Todo = schema.models.Todo;
 
 	self.create = [	// add a todo to the authenticate user
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
@@ -16,17 +17,15 @@ module.exports = function ( model, auth ) {
 			var todo = {
 				name: req.param ( "name" ),
 				description: req.param ( "description" ),
-				dueDate: req.param ( "dueDate" ),
-				UserId: req.user.id,
-				PrivacyId: req.param ( "privacy" ) ? req.param ( "privacy" ) : 2, // default private privacy
-				StatuId: 1 // add status created
+				dueAt: req.param ( "dueDate" ),
+				creator: req.user.id,
+				privacy: req.param ( "privacy" ) ? req.param ( "privacy" ) : 2, // add conf.privacies Private id ???
+				status: 1 // add conf.status Created id ???
 			};
 			// create the todo
-			var query = self.model.Todo.create ( todo );
-			query.success ( function ( todo ) {  
-				// add authenticate user as participant
-				var query = req.user.addTodo ( todo );
-				query.success ( function ( todo ) { res.send ( todo ); } );
+			Todo.create ( todo, function ( err, todo ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				res.status ( 201 ).send ( todo );
 			} );
 		}
 	];
@@ -34,12 +33,13 @@ module.exports = function ( model, auth ) {
 	self.userList = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			// get the user
-			var query = self.model.User.find ( req.param ( "userid" ) );
-			query.success ( function ( user ) {
-				// get the author todos
-				var query = user.getTodoes ( );
-				query.success ( function ( todos ) { res.send ( todos ); } );
+			var userid = req.param ( "userid" );
+			var where = { user: userid };
+			if ( userid != req.user.id )
+				where.privacy = 1; // add conf.privacies Public id ???
+			Todo.all ( { where: where }, function ( err, todos ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				res.send ( todos );
 			} );
 		}
 	];
@@ -47,10 +47,11 @@ module.exports = function ( model, auth ) {
 	self.getById = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.Todo.find ( req.param ( "id" ) );
-			query.success ( function ( todo ) {
-				if ( todo.PrivacyId == 2 ) res.send ( { result: "error", error: "You're not authorize to read this todo" } );
-				else res.send ( todo );
+			Todo.find ( req.param ( "id" ), function ( err, todo ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				if ( !todo ) return res.status ( 404 ).send ( );
+				if ( todo.privacy == 2 && todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+				res.send ( todo );
 			} );
 		}
 	];
@@ -58,14 +59,14 @@ module.exports = function ( model, auth ) {
 	self.delete = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var todoid = req.param ( "id" );
-			var query = self.model.Todo.find ( todoid );
-			query.success ( function ( todo ) {
-				if ( todo.UserId == req.user.id ) {
-					var query = todo.destroy ( );
-					query.success ( function ( ) { res.send ( { result: "ok" } ); } );
-					query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
-				} else res.send ( { result: "error", error: "You're not authorize to delete this todo" } );
+			Todo.find ( req.param ( "id" ), function ( err, todo ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				if ( !todo ) return res.status ( 404 ).send ( );
+				if ( todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+				todo.destroy ( function ( err ) {
+					if ( err ) return res.send ( { result: "error", error: err } );
+					res.send ( { result: "ok" } );
+				} );
 			} );
 		}
 	];
@@ -73,18 +74,22 @@ module.exports = function ( model, auth ) {
 	self.update = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var todoid = req.param ( "id" );
-			var query = self.model.Todo.find ( todoid );
-			query.success ( function ( todo ) {
-				if ( todo.UserId == req.user.id ) {
-					if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
-					if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
-					if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
-					if ( req.param ( "status" ) ) todo.StatuId = req.param ( "status" );
-					if ( req.param ( "privacy" ) ) todo.PrivacyId = req.param ( "privacy" );
-					var query = todo.save ( );
-					query.success ( function ( todo ) { res.send ( todo ); } );
-				} else res.send ( { result: "error", error: "You're not authorize to update this todo" } );
+			Todo.find ( req.param ( "id" ), function ( err, todo ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				if ( !todo ) return res.status ( 404 ).send ( );
+				if ( todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+
+				if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
+				if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
+				if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
+				if ( req.param ( "status" ) ) todo.status = req.param ( "status" );
+				if ( req.param ( "privacy" ) ) todo.privacy = req.param ( "privacy" );
+				todo.updatedAt = new Date ( );
+
+				todo.save ( function ( err, todo ) {
+					if ( err ) return res.send ( { result: "error", error: err } );
+					res.send ( todo );
+				} );
 			} );
 		}
 	];
@@ -92,25 +97,7 @@ module.exports = function ( model, auth ) {
 	self.list = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.Todo.findAll ( );
-			query.success ( function ( todos ) {
-				res.send ( todos );
-			} );
-		}
-	];
 
-	self.getTags = [
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			var query = self.model.Todo.find ( req.param ( "id" ) );
-			query.success ( function ( todo ) {
-				var query = todo.getTags ( );
-				query.success ( function ( tags ) {
-					_tags = [ ];
-					for ( var i in tags ) _tags.push ( tags[i].dataValues.tag );
-					res.send ( _tags );
-				} );
-			} );
 		}
 	];
 
