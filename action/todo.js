@@ -50,7 +50,7 @@ module.exports = function ( schema, auth ) {
 			Todo.find ( req.param ( "id" ), function ( err, todo ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				if ( !todo ) return res.status ( 404 ).send ( );
-				if ( todo.privacy == 2 && todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+				if ( todo.privacy == 2 && todo.user != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
 				res.send ( todo );
 			} );
 		}
@@ -62,7 +62,7 @@ module.exports = function ( schema, auth ) {
 			Todo.find ( req.param ( "id" ), function ( err, todo ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				if ( !todo ) return res.status ( 404 ).send ( );
-				if ( todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+				if ( todo.user != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
 				todo.destroy ( function ( err ) {
 					if ( err ) return res.send ( { result: "error", error: err } );
 					res.send ( { result: "ok" } );
@@ -77,7 +77,7 @@ module.exports = function ( schema, auth ) {
 			Todo.find ( req.param ( "id" ), function ( err, todo ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				if ( !todo ) return res.status ( 404 ).send ( );
-				if ( todo.user != req.user.id ) return res.status. ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+				if ( todo.user != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
 
 				if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
 				if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
