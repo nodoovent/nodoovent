@@ -13,14 +13,14 @@ module.exports = function ( schema ) {
 	DeveloperAccount.hasMany ( OAuth1Client, { as: "clients", foreignKey: "developerAccount" } );
 	OAuth1Client.hasMany ( OAuth1RequestToken, { as: "resquestTokens", foreignKey: "client" } );
 	OAuth1Client.hasMany ( OAuth1AccessToken, { as: "accessTokens", foreignKey: "client" } );
-	// OAuth1Client.belongsTo ( DevelopperAccount, { as: "developperAccount", foreignKey: "developperAccount" } );
+	OAuth1Client.belongsTo ( DeveloperAccount, { foreignKey: "developerAccount" } );
 	User.hasMany ( OAuth1RequestToken, { as: "requestTokens", foreignKey: "user" } );
 	User.hasMany ( OAuth1AccessToken, { as: "accessTokens", foreignKey: "user" } );
 	OAuth1AccessToken.hasAndBelongsToMany ( Permission, { as: "permissions" } );
-	// OAuth1AccessToken.belongsTo ( OAuth1Client, { as: "client", foreignKey: "client" } );
-	// OAuth1AccessToken.belongsTo ( User, { as: "user", foreignKey: "user" } );
-	// OAuth1RequestToken.belongsTo ( OAuth1Client, { as: "client", foreignKey: "client" } );
-	// OAuth1RequestToken.belongsTo ( User, { as: "user", foreignKey: "user" } );
+	OAuth1AccessToken.belongsTo ( OAuth1Client, { foreignKey: "client" } );
+	// OAuth1AccessToken.belongsTo ( User, { foreignKey: "user" } );
+	OAuth1RequestToken.belongsTo ( OAuth1Client, { foreignKey: "client" } );
+	// OAuth1RequestToken.belongsTo ( User, { foreignKey: "user" } );
 
 	return schema;
 }
