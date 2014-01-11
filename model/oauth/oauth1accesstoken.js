@@ -1,32 +1,16 @@
-var Sequelize = require ( "Sequelize" );
+module.exports = function ( schema ) {
 
-module.exports = function ( sequelize ) {
-
-	return sequelize.define (
+	var OAuth1AccessToken = schema.define (
 		"OAuth1AccessToken",
 		{
-			accessToken: {
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			accessSecret: {
-				type: Sequelize.STRING,
-				allowNull: false
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: {
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						accessToken: this.accessToken,
-						accessSecret: this.accessSecret
-					};
-				}
-			}
+			token: { type: String },
+			secret: { type: String },
+			createdAt: { type: Date, default: function ( ) { return new Date; } }
 		}
-	)
+	);
+
+	OAuth1AccessToken.validatesPresenceOf ( "token", "secret" );
+
+	return OAuth1AccessToken;
 
 }

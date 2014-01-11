@@ -1,14 +1,18 @@
 var passport = require ( "passport" );
-var QueryChainer = require ( "Sequelize" ).Utils.QueryChainer;
+var QueryChainer = require ( "../utils" ).QueryChainer;
 
 var oauth1tokenstrategy = require ( "../auth/oauth1tokenstrategy" ).name;
 
 
-module.exports = function ( model, auth ) {
+module.exports = function ( schema, auth ) {
 	var self = this;
 
-	self.model = model;
+	self.schema = schema;
 	self.auth = auth;
+
+	var User = schema.models.User;
+	var OAuth1RequestToken = schema.models.OAuth1RequestToken;
+	var OAuth1AccessToken = schema.models.OAuth1AccessToken;
 
 	self.get = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
@@ -20,25 +24,21 @@ module.exports = function ( model, auth ) {
 	self.getById = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.User.find ( req.param ( "userid" ) );
-			query.success ( function ( user ) { res.send ( user ); } );
-		}
-	];
-
-	self.getByLogin = [	// /!\ Unused /!\ ( gonna be used one day ??)
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			console.log ( req.param ( "login" ) );
-			var query = self.model.User.find ( { where: { login: req.param ( "login" ) } } );
-			query.success ( function ( user ) { res.send ( user ); } );
+			User.find ( req.param ( "userid" ), function ( err, user ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				if ( !user ) return res.status ( 404 ).send ( );
+				res.send ( user );
+			} );
 		}
 	];
 
 	self.list = [
 		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = self.model.User.findAll ( );
-			query.success ( function ( users ) { res.send ( users ); } )
+			User.all ( function ( err, users ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				res.send ( users );
+			} );
 		}
 	];
 
@@ -54,9 +54,10 @@ module.exports = function ( model, auth ) {
 			if ( req.param ( "password" ) || req.param ( "password" ) == "" )
 				req.user.password = req.param ( "password" );
 
-			var query = req.user.save ( );
-			query.success ( function ( user ) { res.send ( user ); } )
-			query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
+			req.user.save ( function ( err, user ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				res.send ( user );
+			} );
 		}
 	];
 
@@ -68,70 +69,35 @@ module.exports = function ( model, auth ) {
 			password: req.param ( "password"),
 			email: req.param ( "email" )
 		};
-		var query = self.model.User.create ( newuser );
-		query.success ( function ( user ) { res.send ( user ); } );
-		query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
+		User.create ( newuser, function ( err, user ) {
+			if ( err ) return res.send ( { result: "error", error: err } );
+			res.status ( 201 ).send ( user );
+		} );
 	}
 
 	self.delete = [
 		passport.authenticate( oauth1tokenstrategy, { session: false } ),
 		function ( req, res ) {
-			var query = req.user.destroy ( );
-			query.success ( function ( ) { res.send ( { result: "ok" } ); } );
-		}
-	];
+			var requesttokens = [ ];
+			var accesstokens = [ ];
 
-	self.addContact = [
-		passport.authenticate( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			var query = self.model.User.find ( req.param ( "contact" ) );
-			query.success ( function ( user ) {
-				var query = req.user.hasContact ( user );
-				query.success ( function ( result ) {
-					if ( result ) {
-						self.contactList[1] ( req, res );
-					} else {
-						var query = req.user.addContact ( user );
-						query.success ( function ( user ) { self.contactList[1] ( req, res ); } );
-					}
-				} );
+			var chainer = new QueryChainer ( );
+			chainer.add ( OAuth1RequestToken, "all", { where: { user: req.user.id } }, function ( err, tokens ) {
+				if ( err ) return;
+				requesttokens = tokens;
 			} );
-		}
-	];
-
-	self.contactList = [
-		passport.authenticate( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			var query = req.user.getContact ( );
-			query.success ( function ( contacts ) {
-				var users = [ ];
-				for ( var i in contacts ) users.push ( { id: contacts[i].dataValues.id, login: contacts[i].dataValues.login } );
-				res.send ( users );
+			chainer.add ( OAuth1AccessToken, "all", { where: { user: req.user.id } }, function ( err, tokens ) {
+				if ( err ) return;
+				accesstokens = tokens;
 			} );
-		}	
-	];
-
-	self.deleteContact = [
-		passport.authenticate( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			var query = self.model.User.find ( req.param ( "id" ) );
-			query.success ( function ( user ) {
-				var query = req.user.removeContact ( user );
-				query.success ( function ( ) { res.send ( { result: "ok" } ); } );
-				query.error ( function ( err ) { res.send ( { result: "error", error: err } ); } );
-			} );
-		}
-	];
-
-	self.getContact = [
-		passport.authenticate( oauth1tokenstrategy, { session: false } ),
-		function ( req, res ) {
-			var query = self.model.User.find ( req.param ( "id" ) );
-			query.success ( function ( user ) {
-				var query = req.user.hasContact ( user );
-				query.success ( function ( result ) {
-					if ( result ) res.send ( {id: user.id, login: user.login } );
-					else res.send ( { } );
+			chainer.run ( function ( errors ) {
+				var chainer = new QueryChainer ( );
+				for ( var i in requesttokens ) chainer.add ( requesttokens[i], "destroy" );
+				for ( var i in accesstokens ) chainer.add ( accesstokens[i], "destroy" );
+				chainer.add ( req.user, "destroy" );
+				chainer.run ( function ( errors ) {
+					if ( errors ) return res.send ( { result: "error", error: errors } );
+					res.send ( { result: "ok" } );
 				} );
 			} );
 		}

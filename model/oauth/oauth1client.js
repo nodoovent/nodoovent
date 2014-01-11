@@ -1,42 +1,20 @@
-var Sequelize = require ( "Sequelize" );
+var Schema = require ( "jugglingdb" ).Schema;
 
-module.exports = function ( sequelize ) {
+module.exports = function ( schema ) {
 
-	return sequelize.define (
+	var OAuth1Client = schema.define (
 		"OAuth1Client",
 		{
-			name: {
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			description: {
-				type: Sequelize.STRING,
-				allowNull: false
-			},
-			consumerKey: {
-				type: Sequelize.STRING,
-				allowNull: false,
-			},
-			consumerSecret: {
-				type: Sequelize.STRING,
-				allowNull: false,
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: {
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						name: this.name,
-						description: this.description,
-						consumerKey: this.consumerKey,
-						consumerSecret: this.consumerSecret
-					};
-				}
-			}
+			name: { type: String },
+			description: { type: Schema.Text },
+			consumerKey: { type: String },
+			consumerSecret: { type: String },
+			createdAt: { type: Date, default: function ( ) { return new Date; } }
 		}
-	)
+	);
+
+	OAuth1Client.validatesPresenceOf ( "name", "consumerKey", "consumerSecret" );
+
+	return OAuth1Client;
 
 }

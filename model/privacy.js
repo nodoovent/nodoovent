@@ -3,29 +3,26 @@
  *
  *	privacy of a todo. Public or Private.
  */
+module.exports = function ( schema, conf ) {
 
-var Sequelize = require ( "Sequelize" );
-
-module.exports = function ( sequelize ) {
-	return sequelize.define (
+	var Privacy = schema.define ( 
 		"Privacy",
 		{
-			name: {
-				type: Sequelize.STRING,
-				allowNull: false
-			}
-		},
-		{
-			freezeTableName: true,
-			classMethods: { },
-			instanceMethods: { 
-				toJSON: function ( ) {
-					return {
-						id: this.id,
-						name: this.name
-					};
-				}
-			}
+			name: { type: String, index: true }
 		}
 	);
+
+	Privacy.validatesPresenceOf ( "name" );
+	Privacy.validatesInclusionOf ( "name", { in: conf.privacies } );
+	Privacy.validatesUniquenessOf ( "name", { message: "name is not unique" } );
+
+	Privacy.prototype.toJSON = function ( ) {
+		if ( typeof this.id == "string" ) this.id = parseInt ( this.id, 10 );
+		return {
+			id: this.id,
+			name: this.name
+		};
+	}
+
+	return Privacy;
 }

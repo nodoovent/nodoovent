@@ -10,21 +10,20 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 
  module.exports.name = "Local";
 
- module.exports.init = function ( model ) {
+ module.exports.init = function ( schema ) {
 
- 	var User = model.User;
+ 	var User = schema.models.User;
 
  	passport.serializeUser ( function ( user, callback ) {
  		callback ( null, user.id );
  	} );
 
  	passport.deserializeUser ( function ( id, callback ) {
- 		var query = User.find ( { where: { id: id } } );
- 		query.error ( function ( err ) { callback ( err ); } );
-		query.success ( function ( user ) {
-			if ( !user ) return callback ( null, false );
-			callback ( null, user );	
-		} );
+ 		User.find ( id, function ( err, user ) {
+ 			if ( err ) return callback ( err );
+ 			if ( !user ) return callback ( "User not found" );
+ 			callback ( null, user );
+ 		} );
  	} );
 
  	return new LocalStrategy (
@@ -33,12 +32,12 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 	 		passwordField: "password"
 	 	},
  		function ( login, password, callback ) {
-	 		var query = User.find ( { where: { login: login, password: password } } );
-	 		query.error ( function ( err ) { callback ( err ); } );
-	 		query.success ( function ( user ) {
-	 			if ( !user ) return callback ( null, false );
-	 			callback ( null, user );
-	 		} );
+ 			User.all ( { where: { login: login, password: password } }, function ( err, users ) {
+ 				if ( err ) return callback ( err );
+ 				if ( users.length > 1 ) callback ( "Many users have the same login and password, it's weird !" );
+ 				if ( users.length == 0 ) callback ( "No user match" );
+ 				callback ( null, users[0] );
+ 			} );
  		}
  	);
 

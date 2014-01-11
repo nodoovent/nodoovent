@@ -7,26 +7,18 @@ module.exports = function ( url ) {
 	this.url = url;
 	this.nodoovent = null;
 
-	this.addUserAndOAuth1AccessToken = function ( sherlock, callback ) {
+	this.addUserAndOAuth1AccessToken = function ( user, callback ) {
+		var models = this.nodoovent.schema.models;
 		// create a test user and add an oauth1 access token
-		var model = this.nodoovent.model;
-		model.User.create ( sherlock )
-		.error ( function ( err ) { callback ( err ); } )
-		.success ( function ( user ) {
-			model.oauth.OAuth1Client.find ( 1 )
-			.error ( function ( err ) { callback ( err ); } )
-			.success ( function ( client ) {
-				accessToken = { accessToken: uid ( 16 ), accessSecret: uid ( 32 )/*, UserId: user.id, OAuth1ClientId: client.id*/ };
-				model.oauth.OAuth1AccessToken.create ( accessToken  )
-				.error ( function ( err ) { callback ( err ); } )
-				.success ( function ( accessToken ) { 
-					client.addOAuth1AccessToken ( accessToken )
-					.error ( function ( err ) { callback ( err ); } )
-					.success ( function ( accessToken ) {
-						user.addOAuth1AccessToken ( accessToken )
-						.error ( function ( err ) { callback ( err ); } )
-						.success ( function ( accessToken ) { callback ( user, client, accessToken ); } );
-					} );
+		models.User.create ( user, function ( err, user ) {
+			if ( err ) return callback ( err )
+			models.OAuth1Client.find ( 1, function ( err, client ) {
+				if ( err ) return callback ( err );
+				if ( !client ) return callback ( "No Client found" );
+				var token = { token: uid ( 16 ), secret: uid ( 32 ), client: client.id, user: user.id };
+				models.OAuth1AccessToken.create ( token, function ( err, token ) {
+					if ( err ) return callback ( err );
+					callback ( null, user, client, token );
 				} );
 			} );
 		} );
@@ -46,7 +38,8 @@ module.exports.prototype.test = function ( ) {
 
 		before ( function ( callback ) {
 			var user = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "adler" };
-			self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+			self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+				if ( err ) return callback ( err );
 				sherlock = user;
 				oauth1client = client;
 				oauth1accesstoken = accessToken;
@@ -61,7 +54,8 @@ module.exports.prototype.test = function ( ) {
 				var req = request ( url ).post ( "/user" ).send ( user );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
-					res.should.have.status ( 200 );
+					res.should.have.status ( 201 );
+					res.should.be.json;
 					res.body.should.have.property ( "id", 2 );
 					res.body.should.have.property ( "firstName", user.firstName );
 					res.body.should.have.property ( "lastName", user.lastName );
@@ -77,6 +71,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -89,6 +84,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -101,6 +97,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -113,6 +110,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -125,6 +123,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -137,6 +136,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -149,6 +149,7 @@ module.exports.prototype.test = function ( ) {
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
+					res.should.be.json;
 					res.body.should.have.property ( "result", "error" );
 					res.body.should.have.property ( "error" );
 					callback ( );
@@ -157,7 +158,7 @@ module.exports.prototype.test = function ( ) {
 
 		} );
 
-		describe ( "GET, UPDATE and DELETE /user need an authentication", function ( ) {
+		describe ( "/user, /users and /users/id need an authentication", function ( ) {
 
 			it ( "should have GET /user return 401 http code", function ( callback ) {
 				var req = request ( url ).get ( "/user" ).send ( );
@@ -186,9 +187,27 @@ module.exports.prototype.test = function ( ) {
 				} );
 			} );
 
+			it ( "should have GET /users return 401 http code", function ( callback ) {
+				var req = request ( url ).get ( "/users" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 401 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have GET /users/1 return 401 http code", function ( callback ) {
+				var req = request ( url ).get ( "/users/1" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 401 );
+					callback ( );
+				} );
+			} );
+
 		} );
 
-		describe ( "GET, UPDATE and DELETE /user end point with oauth1 authentication", function ( ) {		
+		describe ( "/user, /users and /users/id end point with oauth1 authentication", function ( ) {		
 
 			var oauth = null;
 			var accesstoken = "";
@@ -196,8 +215,8 @@ module.exports.prototype.test = function ( ) {
 
 			before ( function ( ) {
 				oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
-				accesstoken = oauth1accesstoken.accessToken;
-				accesssecret = oauth1accesstoken.accessSecret;
+				accesstoken = oauth1accesstoken.token;
+				accesssecret = oauth1accesstoken.secret;
 			} );
 
 			describe ( "GET /user with oauth1 authentication", function ( ) {
@@ -206,12 +225,14 @@ module.exports.prototype.test = function ( ) {
 					oauth.get ( url + "/user", accesstoken, accesssecret, function ( err, data, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
+						res.should.be.json;
 						data = JSON.parse ( data );
 						data.should.have.property ( "id", sherlock.id );
 						data.should.have.property ( "login", sherlock.login );
 						data.should.have.property ( "firstName", sherlock.firstName );
 						data.should.have.property ( "lastName", sherlock.lastName );
 						data.should.have.property ( "email", sherlock.email );
+						data.should.not.have.property ( "password" );
 						callback ( );
 					} );
 				} );
@@ -223,12 +244,12 @@ module.exports.prototype.test = function ( ) {
 				describe ( "[should works]", function ( ) {
 
 					afterEach ( function ( callback ) {
-						self.nodoovent.model.User.find ( sherlock.id )
-							.error ( function ( err ) { callback ( err ); } )
-							.success ( function ( user ) {
-								sherlock = user;
-								callback ( );
-							} );
+						self.nodoovent.schema.models.User.find ( sherlock.id, function ( err, user ) {
+							if ( err ) return callback ( err );
+							if ( !user ) return callback ( "No user foud" );
+							sherlock = user;
+							callback ( );
+						} );
 					} );
 
 					it ( "should have PUT /user end point and update the user's firstName", function ( callback ) {
@@ -236,6 +257,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -251,6 +273,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -266,6 +289,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -281,6 +305,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -296,6 +321,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -311,6 +337,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -326,6 +353,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -341,6 +369,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -356,6 +385,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -371,6 +401,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -386,6 +417,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -401,6 +433,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -416,6 +449,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -431,6 +465,7 @@ module.exports.prototype.test = function ( ) {
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
+							res.should.be.json;
 							data = JSON.parse ( data );
 							data.should.have.property ( "id", sherlock.id );
 							data.should.have.property ( "login", sherlock.login );
@@ -485,8 +520,8 @@ module.exports.prototype.test = function ( ) {
 
 			} );
 
-			describe ( "DELETE /user with an oauth1 authentication", function ( ) {
-				
+			 describe ( "DELETE /user with an oauth1 authentication", function ( ) {
+
 				var delusr = null;
 				var delaccesstoken = null;
 				var delaccesssecret = null;
@@ -494,11 +529,12 @@ module.exports.prototype.test = function ( ) {
 
 				before ( function ( callback ) {
 					var user = { firstName: "Alain", lastName: "Bashung", login: "bleupetrole", email: "alain.bashung@musicgenius.com", password: "gaby" };
-					self.addUserAndOAuth1AccessToken ( user, function ( user, client, accessToken ) {
+					self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+						if ( err ) return callback ( err );
 						delusr = user;
-						delaccesstoken = accessToken.accessToken;
-						delaccesssecret = accessToken.accessSecret;
-						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+						delaccesstoken = accessToken.token;
+						delaccesssecret = accessToken.secret;
+						deloauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken", client.consumerKey, client.consumerSecret, "1.0", "", "HMAC-SHA1" );
 						callback ( );
 					} );
 				} );
@@ -507,6 +543,7 @@ module.exports.prototype.test = function ( ) {
 					deloauth.delete ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
+						res.should.be.json;
 						data = JSON.parse ( data );
 						data.should.have.property ( "result", "ok" );
 						callback ( );
@@ -516,6 +553,58 @@ module.exports.prototype.test = function ( ) {
 				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
 					deloauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						res.should.have.status ( 401 );
+						callback ( );
+					} );
+				} );
+
+			} );
+
+			describe ( "GET /users with an oauth1 authentication", function ( ) {
+
+				it ( "should have a GET /users endpoint and have a http status", function ( callback ) {
+					oauth.get ( url + "/users", accesstoken, accesssecret, function ( err, data, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 200 );
+						res.should.be.json;
+						data = JSON.parse ( data );
+						data.should.be.an.instanceof ( Array );
+						for ( var i in data ) {
+							var user = data[i];
+							user.should.have.property ( "id" );
+							user.should.have.property ( "login" );
+							user.should.have.property ( "firstName" );
+							user.should.have.property ( "lastName" );
+							user.should.have.property ( "email" );
+							user.should.not.have.property ( "password" );
+						}
+						callback ( );
+					} );
+				} );
+
+				var usercount = 2;
+				var testUserWithId = function ( i ) {
+					it ( "should have GET /users/" + ( i + 1 ) + " end point with oauth1 authentication", function ( callback ) {
+						oauth.get ( url + "/users/" + ( i + 1 ), accesstoken, accesssecret, function ( err, data, res ) {
+							if ( err ) return callback ( err );
+							res.should.have.status ( 200 );
+							res.should.be.json;
+							data = JSON.parse ( data );
+							data.should.have.property ( "id" );
+							data.should.have.property ( "login" );
+							data.should.have.property ( "firstName" );
+							data.should.have.property ( "lastName" );
+							data.should.have.property ( "email" );
+							data.should.not.have.property ( "password" );
+							callback ( );
+						} );
+					} );
+				}
+
+				for ( var i = 0; i < usercount; i++ ) testUserWithId ( i );
+
+				it ( "should not have GET /users/" + ( usercount + 1 ) + " end point with oauth1 authentication", function ( callback ) {
+					oauth.get ( url + "/users/" + ( usercount + 1 ), accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 404 );
 						callback ( );
 					} );
 				} );

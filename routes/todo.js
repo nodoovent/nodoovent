@@ -12,7 +12,6 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.todo.userList
 		},
 
-		
 		"/todos": {
 			"POST": self.action.todo.create,	// add a todo for the authenticate user
 			"GET": self.action.todo.list 		// search in all todos
@@ -23,11 +22,6 @@ module.exports = function ( model, auth, action ) {
 			"GET": self.action.todo.getById,
 			"DELETE": self.action.todo.delete,
 			"PUT": self.action.todo.update
-		},
-
-		// manipulate tags of a todo
-		"/todos/:id/tags": {
-			"GET": self.action.todo.getTags
 		}
 
 	}

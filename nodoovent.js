@@ -46,7 +46,7 @@ module.exports = function ( callback ) {
 	var _conf = conf ( app.get ( "env" ) );
 
 	// init model
-	var _model = model.init ( _conf.db, callback );
+	var _model = model.init ( _conf, callback );
 
 	// init authentification
 	var _auth = new auth ( _model );
@@ -60,13 +60,11 @@ module.exports = function ( callback ) {
 
 	// build routes
 	routebuilder ( app, _routes.routes );
-
-	// require ( "./datas" ) ( _model );
-
+	
 	// add variables to this
 	this.app = app;
 	this.conf = _conf;
-	this.model = _model;
+	this.schema = _model;
 	this.auth = _auth;
 	this.actions = _action;
 	this.routes = _routes;

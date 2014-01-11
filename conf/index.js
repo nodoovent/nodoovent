@@ -8,5 +8,8 @@ module.exports = function ( mode ) {
 		conf.db = require ( "./db" );
 	}
 
+	conf.privacies = [ "Public", "Private" ];
+	conf.status = [ "Created", "In Progress", "Done", "Canceled", "In Development", "Rejected" ];
+
 	return conf;
 };
