@@ -2,7 +2,12 @@
  * Module dependencies.
  */
 
-var express = require ( "express" );
+// koa require
+var koa = require ( "koa" );
+var logger = require ( "koa-logger" );
+var favicon = require ( "koa-favicon" );
+var serve = require ( "koa-static" );
+
 var path = require ( "path" );
 var passport = require ( "passport" );
 
@@ -15,22 +20,22 @@ var action = require ( "./action" );
 
 module.exports = function ( callback ) {
 
-	var app = express ( );
+	var app = koa ( );
 
 	// all environments
 	app.set ( "port", process.env.PORT || 3000 );
 	app.set ( "views", __dirname + "/views" );
 	app.set ( "view engine", "ejs" );
-	app.use ( express.favicon ( ) );
+	app.use ( favicon ( ) );
 	app.use ( express.bodyParser ( ) );
-	if  ( "development" == app.get ( "env" ) ) { app.use ( express.logger ( "dev" ) ); }
+	if  ( "development" == app.get ( "env" ) ) { app.use ( logger ( ) ); }
 	app.use ( express.methodOverride ( ) );
 	app.use ( express.cookieParser ( "your secret here" ) );
 	app.use ( express.session ( { secret: 'nodoovent ninja dev' } ) );
 	app.use ( passport.initialize ( ) );
 	app.use ( passport.session ( ) );
 	app.use ( app.router );
-	app.use ( express.static ( path.join ( __dirname, "public" ) ) );
+	app.use ( serve ( path.join ( __dirname, "public" ) ) );
 
 	// development only
 	if  ( "development" == app.get ( "env" ) ) {
