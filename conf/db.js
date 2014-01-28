@@ -10,12 +10,14 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	engine: "sqlite3",
+	engine: "disk",
 
-
-	// see jugglingdb sqlite3 adaptater doc
-	sqlite3: {
-		database: path.join ( __dirname, "../nodoovent.sqlite" ) 
+	// Disk db storage
+	disk: {
+		module: "sails-disk",
+		params: {
+			filePath: path.join ( __dirname, "../nodoovent.db.json" ) 
+		}
 	}
 
 };

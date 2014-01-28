@@ -10,16 +10,16 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 
  module.exports.name = "Local";
 
- module.exports.init = function ( schema ) {
+ module.exports.init = function ( models ) {
 
- 	var User = schema.models.User;
+ 	var users = models.users;
 
  	passport.serializeUser ( function ( user, callback ) {
  		callback ( null, user.id );
  	} );
 
  	passport.deserializeUser ( function ( id, callback ) {
- 		User.find ( id, function ( err, user ) {
+ 		users.findOne ( id ).exec ( function ( err, user ) {
  			if ( err ) return callback ( err );
  			if ( !user ) return callback ( "User not found" );
  			callback ( null, user );
@@ -32,11 +32,10 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 	 		passwordField: "password"
 	 	},
  		function ( login, password, callback ) {
- 			User.all ( { where: { login: login, password: password } }, function ( err, users ) {
+ 			users.findOne ( ).where ( { login: login, password: password } ).exec ( function ( err, user ) {
  				if ( err ) return callback ( err );
- 				if ( users.length > 1 ) callback ( "Many users have the same login and password, it's weird !" );
- 				if ( users.length == 0 ) callback ( "No user match" );
- 				callback ( null, users[0] );
+ 				if ( !user ) return callback ( "User not found" );
+ 				callback ( null, user );
  			} );
  		}
  	);

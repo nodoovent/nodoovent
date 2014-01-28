@@ -1,15 +1,27 @@
-module.exports = function ( schema ) {
+var Waterline = require ( "waterline" );
 
-	var OAuth1AccessToken = schema.define (
-		"OAuth1AccessToken",
-		{
-			token: { type: String },
-			secret: { type: String },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter ) {
+
+	var OAuth1AccessToken = Waterline.Collection.extend ( {
+		adapter: adapter.name,
+		tableName: "oauth1accesstokens", // not use maj for table name - waterline bug
+		attributes: {
+			token: {
+				type: "string",
+				required: true
+			},
+			secret: {
+				type: "string",
+				required: true
+			},
+			// associations
+			clientpermissions: { collection: "clientpermissions" },
+			oauth1client: { model: "oauth1clients" },
+			user: { model: "users" }
 		}
-	);
+	} );
 
-	OAuth1AccessToken.validatesPresenceOf ( "token", "secret" );
+	waterline.loadCollection ( OAuth1AccessToken );
 
 	return OAuth1AccessToken;
 

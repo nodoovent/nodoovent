@@ -1,8 +1,8 @@
 var http = require ( "http" );
 var Nodoovent = require ( "./nodoovent" );
 
-var nodoovent = new Nodoovent ( function ( ) {
-
+Nodoovent ( function ( errors, nodoovent ) {
+	if ( errors ) return console.error ( errors );
 	var app = nodoovent.app;
 
 	http.createServer ( app ).listen ( app.get ( "port" ), function ( ) {

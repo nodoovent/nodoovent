@@ -3,44 +3,45 @@
  *
  *
  */
-
-var validateEmail = require ( "../utils" ).validateEmail;
  
-module.exports = function ( schema ) {
+var Waterline = require ( "waterline" );
+ 
+module.exports = function ( waterline, adapter ) {
 
-	var User = schema.define ( 
-		"User",
-		{
-			firstName: { type: String },
-			lastName: { type: String },
-			login: { type: String },
-			password: { type: String },
-			email: { type: String },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+	var User = Waterline.Collection.extend ( {
+		adapter: adapter.name,
+		tableName: "users", // not use maj for table name - waterline bug
+		attributes: {
+			firstName: { type: "string" },
+			lastName: { type: "string" },
+			login: {
+				type: "string",
+				required: true,
+				maxLength: 20,
+				unique: true
+			},
+			password: {
+				type: "string",
+				required: true,
+				minLength: 5
+			},
+			email: {
+				type: "email",
+				required: true,
+				unique: true
+			},
+			// associations
+			oauth1requesttokens: { collection: "oauth1requesttokens" },
+			oauth1accesstokens: { collection: "oauth1accesstokens" },
+
+			// instance methods
+			fullName: function ( ) {
+				return this.firstName + " " + this.lastName;
+			}
 		}
-	);
+	} );
 
-	User.validatesPresenceOf ( "login", "password", "email" );
-	User.validatesUniquenessOf ( "email", { message: "email is not unique" } );
-	User.validatesUniquenessOf ( "login", { message: "login is not unique" } );
-
-	var validateUserEmail = function ( callbackerr ) {
-		if ( !validateEmail ( this.email ) ) return callbackerr ( );
-	};
-
-	User.validate ( "email", validateUserEmail, { message: "email not valid" } );
-
-	User.prototype.toJSON = function ( ) {
-		return {
-			id: this.id,
-			firstName: this.firstName,
-			lastName: this.lastName,
-			login: this.login,
-			email: this.email,
-			createdAt: this.createdAt
-		}
-	}
+	waterline.loadCollection ( User );
 
 	return User;
-
 }

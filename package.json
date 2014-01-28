@@ -35,9 +35,9 @@
     "oauthorize": "~0.1.0",
     "connect-ensure-login": "~0.1.1",
     "passport-local": "~0.1.6",
-    "jugglingdb": "~0.2.4",
-    "jugglingdb-sqlite3": "0.0.3",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "waterline": "git://github.com/balderdashy/waterline.git#associations",
+    "sails-disk": "git://github.com/balderdashy/sails-disk.git#associations"
   },
   "license": "MIT",
   "engine": {
@@ -47,6 +47,7 @@
     "mocha": "*",
     "should": "~2.0.2",
     "supertest": "~0.8.1",
-    "oauth": "~0.9.10"
+    "oauth": "~0.9.10",
+    "sails-memory": "git://github.com/balderdashy/sails-memory.git#associations"
   }
 }

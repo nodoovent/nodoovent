@@ -4,26 +4,24 @@
  *	the current status of a todo (for example: "In progress").
  */
 
-module.exports = function ( schema, conf ) {
+var Waterline = require ( "waterline" );
 
-	var Status = schema.define ( 
-		"Status",
-		{
-			status: { type: String, index: true }
+module.exports = function ( waterline, adapter, conf ) {
+
+	var Status = Waterline.Collection.extend ( {
+		adapter: adapter.name,
+		tableName: "status", // not use maj for table name - waterline bug
+		attributes: {
+			name: {
+				type: "string",
+				required: true,
+				unique: true,
+				in: conf.status
+			}
 		}
-	);
+	} );
 
-	Status.validatesPresenceOf ( "status" );
-	Status.validatesInclusionOf ( "status", { in: conf.status } );
-	Status.validatesUniquenessOf ( "status", { message: "status is not unique" } );
-
-	Status.prototype.toJSON = function ( ) {
-		if ( typeof this.id == "string" ) this.id = parseInt ( this.id, 10 );
-		return {
-			id: this.id,
-			status: this.status
-		};
-	}
+	waterline.loadCollection ( Status );
 
 	return Status;
 } 

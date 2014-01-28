@@ -1,19 +1,32 @@
-var Schema = require ( "jugglingdb" ).Schema;
+var Waterline = require ( "waterline" );
 
-module.exports = function ( schema ) {
-
-	var OAuth1Client = schema.define (
-		"OAuth1Client",
-		{
-			name: { type: String },
-			description: { type: Schema.Text },
-			consumerKey: { type: String },
-			consumerSecret: { type: String },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter ) {
+	
+	var OAuth1Client = Waterline.Collection.extend ( {
+		adapter: adapter.name,
+		tableName: "oauth1clients", // not use maj for table name - waterline bug
+		attributes: {
+			name: {
+				type: "string",
+				required: true
+			},
+			description: { type: "text" },
+			consumerKey: {
+				type: "string",
+				required: true
+			},
+			consumerSecret: {
+				type: "string",
+				required: true
+			},
+			// associations
+			oauth1requesttokens: { collection: "oauth1requesttokens" },
+			oauth1accesstokens: { collection: "oauth1accesstokens" },
+			developeraccount: { model: "developeraccounts" }
 		}
-	);
+	} );
 
-	OAuth1Client.validatesPresenceOf ( "name", "consumerKey", "consumerSecret" );
+	waterline.loadCollection ( OAuth1Client );
 
 	return OAuth1Client;
 

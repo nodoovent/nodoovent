@@ -7,15 +7,17 @@ var path = require ( "path" );
 var passport = require ( "passport" );
 
 var conf = require ( "./conf" );
-var routebuilder = require ( "./routebuilder" );
+var routebuilder = require ( "./utils" ).RouteBuilder;
 var routes = require ( "./routes" );
-var model = require ( "./model" );
+var models = require ( "./model" );
 var auth = require ( "./auth" );
-var action = require ( "./action" );
+var actions = require ( "./action" );
 
 module.exports = function ( callback ) {
+	var nodoovent = { };
 
-	var app = express ( );
+	nodoovent.app = express ( );
+	var app = nodoovent.app;
 
 	// all environments
 	app.set ( "port", process.env.PORT || 3000 );
@@ -43,30 +45,19 @@ module.exports = function ( callback ) {
 	}
 
 	// load conf
-	var _conf = conf ( app.get ( "env" ) );
+	nodoovent.conf = conf ( app.get ( "env" ) );
 
 	// init model
-	var _model = model.init ( _conf, callback );
+	models.init ( nodoovent.conf, function ( err, models ) {
+		if ( err ) return callback ( err );
+		nodoovent.models = models;
 
-	// init authentification
-	var _auth = new auth ( _model );
+		nodoovent.auth = new auth ( nodoovent.models );
+		nodoovent.actions = new actions ( nodoovent.models, nodoovent.auth );
+		nodoovent.routes = new routes ( nodoovent.models, nodoovent.auth, nodoovent.actions );
 
+		routebuilder ( nodoovent.app, nodoovent.routes.routes );
 
-	// init actions
-	var _action = new action ( _model, _auth );
-
-	// init routes
-	var _routes = new routes ( _model, _auth, _action )
-
-	// build routes
-	routebuilder ( app, _routes.routes );
-	
-	// add variables to this
-	this.app = app;
-	this.conf = _conf;
-	this.schema = _model;
-	this.auth = _auth;
-	this.actions = _action;
-	this.routes = _routes;
-
+		callback ( null, nodoovent );
+	} );
 };
