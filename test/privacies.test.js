@@ -1,16 +1,13 @@
 var should = require ( "should" );
 var request = require ( "supertest" );
 
-module.exports = function ( url ) {
-	this.url = url;
-	this.privacies = [ "Public", "Private" ];
-	this.lprivacies = this.privacies.length;
-}
+/*
+ *	Status tests uses current Nodoovent configuration (see conf folder)
+ */
+module.exports = function ( nodoovent, url ) {
 
-module.exports.prototype.test = function ( ) {
-	var url = this.url;
-	var privacies = this.privacies;
-	var lprivacies = this.lprivacies;
+	var privacies = nodoovent.conf.privacies;
+	var lprivacies = privacies.length;
 
 	describe ( "Test /privacies end points:", function ( ) {
 

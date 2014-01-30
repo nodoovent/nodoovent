@@ -10,12 +10,20 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	engine: "sqlite3",
+	engine: "memory",
 
+	// Disk db storage
+	disk: {
+		module: "sails-disk",
+		params: {
+			filePath: path.join ( __dirname, "../nodoovent.test.db.json" ) 
+		}
+	},
 
-	// see jugglingdb sqlite3 adaptater doc
-	sqlite3: {
-		database: ":memory:" 
+	// Memory db storage
+	memory: {
+		module: "sails-memory",
+		params: { }
 	}
 
 };

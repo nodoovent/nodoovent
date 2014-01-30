@@ -18,6 +18,12 @@ module.exports = {
 		params: {
 			filePath: path.join ( __dirname, "../nodoovent.db.json" ) 
 		}
+	},
+
+	// Memory db storage
+	memory: {
+		module: "sails-memory",
+		params: { }
 	}
 
 };
