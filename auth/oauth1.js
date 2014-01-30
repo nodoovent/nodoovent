@@ -47,7 +47,7 @@ module.exports = function ( models ) {
 			var secret = utils.uid ( 32 );		
 
 			// build OAuth1RequestToken
-			var requesttoken = { token: token, secret: secret, callbackUrl: callbackURL, timeout: new Date ( ).getTime ( ) + duration, client: client.id };
+			var requesttoken = { token: token, secret: secret, callbackUrl: callbackURL, timeout: new Date ( new Date ( ).getTime ( ) + duration ), oauth1client: client.id };
 			oauth1requesttokens.create ( requesttoken, function ( err, requesttoken ) {
 				if ( err ) return callback ( err );
 				callback ( null, token, secret );
@@ -71,13 +71,13 @@ module.exports = function ( models ) {
 			},
 			function ( client, requestToken, token, callback ) {
 				if ( !token.approved ) return callback ( null, false );
-				if ( client.id !== token.client ) return callback ( null, false );
+				if ( client.id !== token.oauth1client ) return callback ( null, false );
 
 				var accesstoken = utils.uid ( 16 );
 				var accesssecret = utils.uid ( 64 );
 
 				// create access token
-				var access = { token: accesstoken, secret: accesssecret, client: client.id, user: token.user };
+				var access = { token: accesstoken, secret: accesssecret, oauth1client: client.id, user: token.user };
 				oauth1accesstokens.create ( access, function ( err, access ) {
 					if ( err ) return callback ( err );
 					callback ( null, accesstoken, accesssecret );
@@ -102,7 +102,7 @@ module.exports = function ( models ) {
 			oauth1requesttokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
 				if ( !token ) return callback ( "No OAuth1 Request Token found" );
-				oauth1clients.findOne ( token.client ).exec ( function ( err, client ) {
+				oauth1clients.findOne ( token.oauth1client ).exec ( function ( err, client ) {
 					if ( err ) return callback ( err );
 					if ( !client ) return callback ( "No OAuth1 Client found" );
 					callback ( null, client, token.callbackUrl );
@@ -128,14 +128,16 @@ module.exports = function ( models ) {
 
 				// don't pass id to update
 				var id = { id: token.id };
-				delete roken.id;
+				delete token.id;
 
 				token.verifier = utils.uid ( 8 );
 				token.approved = true;
 				token.user = user.id;
 
-				oauth1requesttokens.update ( id, token, function ( err, token ) {
+				oauth1requesttokens.update ( id, token, function ( err, tokens ) {
 					if ( err ) return callack ( err );
+					var token = tokens[0];
+					console.log(token);
 					callback ( null, token.verifier );
 				} );
 			} );

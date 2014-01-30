@@ -35,7 +35,7 @@ module.exports.init = function ( models ) {
 		function ( accessToken, callback ) {
 			oauth1accesstokens.findOne ( ).where ( { token: accessToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( !token ) return callback ( "No OAuth1 Access Token foubd" );
+				if ( !token ) return callback ( "No OAuth1 Access Token found" );
 				users.findOne ( token.user ).exec ( function ( err, user ) {
 					if ( err ) return callback ( err );
 					if ( !user ) return ( "No User found" );
