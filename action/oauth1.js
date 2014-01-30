@@ -1,7 +1,7 @@
-module.exports = function ( model, auth ) {
+module.exports = function ( models, auth ) {
 	var self = this;
 
-	self.model = model;
+	self.models = models;
 	self.auth = auth;
 
 	self.decision = function ( req, res ) {
