@@ -22,7 +22,7 @@ module.exports.init = function ( models ) {
 		function ( consumerKey, callback ) {
 			oauth1clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
-				if ( !client ) return callback ( "No OAuth1 Client found" );
+				if ( !client ) return callback ( null, false );
 				callback ( null, client, client.consumerKey );
 			} );
 		},
@@ -33,7 +33,7 @@ module.exports.init = function ( models ) {
 		function ( requestToken, callback ) {
 			oauth1requesttokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( !token ) return callback ( "No OAuth1 Request Token found" );
+				if ( !token ) return callback ( null, false );
 				callback ( null, token.secret, token );
 			} );
 		},

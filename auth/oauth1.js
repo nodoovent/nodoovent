@@ -137,7 +137,6 @@ module.exports = function ( models ) {
 				oauth1requesttokens.update ( id, token, function ( err, tokens ) {
 					if ( err ) return callack ( err );
 					var token = tokens[0];
-					console.log(token);
 					callback ( null, token.verifier );
 				} );
 			} );

@@ -24,7 +24,7 @@ module.exports.init = function ( models ) {
 		function ( consumerKey, callback ) {
 			oauth1clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
-				if ( !client ) return callback ( "No OAuth1 Client found" );
+				if ( !client ) return callback ( null, false );
 				callback ( null, client, client.consumerKey );
 			} );
 		},
@@ -35,10 +35,10 @@ module.exports.init = function ( models ) {
 		function ( accessToken, callback ) {
 			oauth1accesstokens.findOne ( ).where ( { token: accessToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( !token ) return callback ( "No OAuth1 Access Token found" );
+				if ( !token ) return callback ( null, false );
 				users.findOne ( token.user ).exec ( function ( err, user ) {
 					if ( err ) return callback ( err );
-					if ( !user ) return ( "No User found" );
+					if ( !user ) return callback ( "No User found" );
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission model)
 					callback ( null, user, token.secret, info );
 				} );

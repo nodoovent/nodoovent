@@ -3,32 +3,26 @@ var request = require ( "supertest" );
 var OAuth = require ( "oauth" ).OAuth;
 var uid = require ( "../utils" ).uid;
 
-module.exports = function ( url ) {
-	this.url = url;
-	this.nodoovent = null;
-
-	this.addUserAndOAuth1AccessToken = function ( user, callback ) {
-		var models = this.nodoovent.schema.models;
-		// create a test user and add an oauth1 access token
-		models.User.create ( user, function ( err, user ) {
-			if ( err ) return callback ( err )
-			models.OAuth1Client.find ( 1, function ( err, client ) {
+function addUserAndOAuth1AccessToken ( nodoovent, user, callback ) {
+	var models = nodoovent.models;
+	// create a test user and add an oauth1 access token
+	models.users.create ( user, function ( err, user ) {
+		if ( err ) return callback ( err )
+		models.oauth1clients.findOne ( 1 ).exec ( function ( err, client ) {
+			if ( err ) return callback ( err );
+			if ( !client ) return callback ( "No Client found" );
+			var token = { token: uid ( 16 ), secret: uid ( 32 ), client: client.id, user: user.id };
+			models.oauth1accesstokens.create ( token, function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( !client ) return callback ( "No Client found" );
-				var token = { token: uid ( 16 ), secret: uid ( 32 ), client: client.id, user: user.id };
-				models.OAuth1AccessToken.create ( token, function ( err, token ) {
-					if ( err ) return callback ( err );
-					callback ( null, user, client, token );
-				} );
+				callback ( null, user, client, token );
 			} );
 		} );
-	}
-	
+	} );
 }
 
-module.exports.prototype.test = function ( ) {
-	var self = this;
-	var url = self.url;
+module.exports = function ( nodoovent, URL ) {
+
+	var url = URL;
 
 	describe ( "Test /user end points:", function ( ) {
 
@@ -37,8 +31,8 @@ module.exports.prototype.test = function ( ) {
 		var oauth1client = null;
 
 		before ( function ( callback ) {
-			var user = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "adler" };
-			self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+			var user = { firstName: "Sherlock", lastName: "Holmes", login: "sherlock", email: "sherlock.holmes@backerstreet.com", password: "iadler" };
+			addUserAndOAuth1AccessToken ( nodoovent, user, function ( err, user, client, accessToken ) {
 				if ( err ) return callback ( err );
 				sherlock = user;
 				oauth1client = client;
@@ -50,7 +44,7 @@ module.exports.prototype.test = function ( ) {
 		describe ( "POST /user end point", function ( ) {
 
 			it ( "should have POST /user end point and create a new user", function ( callback ) {
-				var user = { firstName: "John", lastName: "Doe", login: "jdoe", email: "john.doe@gmail.com", password: "doe" };
+				var user = { firstName: "John", lastName: "Doe", login: "jdoe", email: "john.doe@gmail.com", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( user );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -66,7 +60,7 @@ module.exports.prototype.test = function ( ) {
 			} );
 
 			it ( "should not add user with existing login", function ( callback ) {
-				var jackDoe = { firstName: "Jack", lastName: "Doe", login: sherlock.login, email: "jack.doe@gmail.com", password: "doe" };
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: sherlock.login, email: "jack.doe@gmail.com", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -79,7 +73,7 @@ module.exports.prototype.test = function ( ) {
 			} );
 
 			it ( "should not add user with an empty login", function ( callback ) {
-				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "", email: "jack.doe@gmail.com", password: "doe" };
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "", email: "jack.doe@gmail.com", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -118,7 +112,7 @@ module.exports.prototype.test = function ( ) {
 			} );
 
 			it ( "should not add user without a valid address mail", function ( callback ) {
-				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "jackgmailcom", password: "doe" };
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "jackgmailcom", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -131,7 +125,7 @@ module.exports.prototype.test = function ( ) {
 			} );
 
 			it ( "should not add user with an empty address mail", function ( callback ) {
-				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "", password: "doe" };
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -144,7 +138,7 @@ module.exports.prototype.test = function ( ) {
 			} );
 
 			it ( "should not add user without an address mail", function ( callback ) {
-				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", password: "doe" };
+				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", password: "johndoe" };
 				var req = request ( url ).post ( "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
@@ -244,7 +238,7 @@ module.exports.prototype.test = function ( ) {
 				describe ( "[should works]", function ( ) {
 
 					afterEach ( function ( callback ) {
-						self.nodoovent.schema.models.User.find ( sherlock.id, function ( err, user ) {
+						nodoovent.models.users.findOne ( sherlock.id ).exec ( function ( err, user ) {
 							if ( err ) return callback ( err );
 							if ( !user ) return callback ( "No user foud" );
 							sherlock = user;
@@ -301,7 +295,7 @@ module.exports.prototype.test = function ( ) {
 					} );
 
 					it ( "should have PUT /user end point and update the user's password", function ( callback ) {
-						var user = { password: "mary" };
+						var user = { password: "mary!" };
 						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
 							if ( err ) return callback ( err );
 							res.should.have.status ( 200 );
@@ -520,7 +514,7 @@ module.exports.prototype.test = function ( ) {
 
 			} );
 
-			 describe ( "DELETE /user with an oauth1 authentication", function ( ) {
+			describe ( "DELETE /user with an oauth1 authentication", function ( ) {
 
 				var delusr = null;
 				var delaccesstoken = null;
@@ -528,8 +522,8 @@ module.exports.prototype.test = function ( ) {
 				var deloauth = null;
 
 				before ( function ( callback ) {
-					var user = { firstName: "Alain", lastName: "Bashung", login: "bleupetrole", email: "alain.bashung@musicgenius.com", password: "gaby" };
-					self.addUserAndOAuth1AccessToken ( user, function ( err, user, client, accessToken ) {
+					var user = { firstName: "Alain", lastName: "Bashung", login: "bleupetrole", email: "alain.bashung@musicgenius.com", password: "gaby!" };
+					addUserAndOAuth1AccessToken ( nodoovent, user, function ( err, user, client, accessToken ) {
 						if ( err ) return callback ( err );
 						delusr = user;
 						delaccesstoken = accessToken.token;
@@ -550,7 +544,7 @@ module.exports.prototype.test = function ( ) {
 					} );
 				} );
 
-				it ( "should the user is delete and /GET user with oauth1 authentication return 401 http code", function ( callback ) {
+				it ( "should the user is delete and GET /user with oauth1 authentication return 401 http code", function ( callback ) {
 					deloauth.get ( url + "/user", delaccesstoken, delaccesssecret, function ( err, data, res ) {
 						res.should.have.status ( 401 );
 						callback ( );

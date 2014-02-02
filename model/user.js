@@ -37,6 +37,11 @@ module.exports = function ( waterline, adapter ) {
 			// instance methods
 			fullName: function ( ) {
 				return this.firstName + " " + this.lastName;
+			},
+
+			toJSON: function ( ) {
+				delete this.password;
+				return this;
 			}
 		}
 	} );

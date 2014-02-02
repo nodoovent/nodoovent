@@ -34,7 +34,7 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
  		function ( login, password, callback ) {
  			users.findOne ( ).where ( { login: login, password: password } ).exec ( function ( err, user ) {
  				if ( err ) return callback ( err );
- 				if ( !user ) return callback ( "User not found" );
+ 				if ( user ) return callback ( null, false );
  				callback ( null, user );
  			} );
  		}
