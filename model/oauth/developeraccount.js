@@ -20,7 +20,7 @@ module.exports = function ( waterline, adapter ) {
 				unique: true
 			},
 			// associations
-			oauth1clients: { collection: "oauth1clients" }
+			oauth1Clients: { collection: "oauth1clients" }
 		}
 	} );
 

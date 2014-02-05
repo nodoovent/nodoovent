@@ -1,12 +1,13 @@
 var passport = require ( "passport" );
-var localstrategy = require ( "../auth/localstrategy" ).name;
 
-var privacy = require ( "./privacy" );
-var status = require ( "./status" );
-// var todo = require ( "./todo" );
+var LocalStrategy = require ( "../auth/localstrategy" );
+var localstrategy = LocalStrategy.name;
+
+var Privacy = require ( "./privacy" );
+var Status = require ( "./status" );
 // var tag = require ( "./tag" );
-var user = require ( "./user" );
-var oauth1 = require ( "./oauth1" );
+var User = require ( "./user" );
+var OAuth1 = require ( "./oauth1" );
 
 
 module.exports = function ( models, auth ) {
@@ -25,11 +26,10 @@ module.exports = function ( models, auth ) {
 
 	self.login = passport.authenticate ( localstrategy,  { successReturnToOrRedirect: '/', failureRedirect: '/login' } );
 
-	self.privacy = new privacy ( self.models, self.auth );
-	self.status = new status ( self.models, self.auth );
+	self.privacy = new Privacy ( self.models, self.auth );
+	self.status = new Status ( self.models, self.auth );
 	// self.tag = new tag ( self.models, self.auth );
-	// self.todo = new todo ( self.models, self.auth );
-	self.user = new user ( self.models, self.auth );
-	self.oauth1 = new oauth1 ( self.models, self.auth );
+	self.user = new User ( self.models, self.auth );
+	self.oauth1 = new OAuth1 ( self.models, self.auth );
 
 }

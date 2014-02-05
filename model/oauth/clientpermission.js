@@ -15,7 +15,7 @@ module.exports = function ( waterline, adapter ) {
 				required: true
 			},
 			// associations
-			oauth1accesstokens: { collection: "oauth1accesstokens" }
+			oauth1AccessTokens: { collection: "oauth1accesstokens" }
 		}
 	} );
 

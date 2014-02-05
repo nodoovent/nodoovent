@@ -1,7 +1,10 @@
 var passport = require ( "passport" );
-var QueryChainer = require ( "../utils" ).QueryChainer;
 
-var oauth1tokenstrategy = require ( "../auth/oauth1tokenstrategy" ).name;
+var Utils = require ( "../utils/" );
+var QueryChainer = Utils.QueryChainer;
+
+var OAuth1TokenStrategy = require ( "../auth/oauth1tokenstrategy" );
+var oauth1TokenStrategy = OAuth1TokenStrategy.name;
 
 
 module.exports = function ( models, auth ) {
@@ -10,21 +13,21 @@ module.exports = function ( models, auth ) {
 	self.models = models;
 	self.auth = auth;
 
-	var users = models.users;
-	var oauth1requesttokens = models.oauth1requesttokens;
-	var oauth1accesstokens = models.oauth1accesstokens;
+	var Users = models.users;
+	var OAuth1RequestTokens = models.oauth1requesttokens;
+	var OAuth1AccessTokens = models.oauth1accesstokens;
 
 	self.get = [
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
 			res.send ( req.user ); // call to req.user.toJSON ( )
 		}
 	];
 
 	self.getById = [
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
-			users.findOne ( req.param ( "userid" ) ).exec ( function ( err, user ) {
+			Users.findOne ( req.param ( "userid" ) ).exec ( function ( err, user ) {
 				if ( err ) return res.status ( 500 ).send ( { result: "error", error: err } );
 				if ( !user ) return res.status ( 404 ).send ( );
 				res.send ( user );
@@ -33,9 +36,9 @@ module.exports = function ( models, auth ) {
 	];
 
 	self.list = [
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
-			users.find ( function ( err, users ) {
+			Users.find ( function ( err, users ) {
 				if ( err ) return res.status ( 500 ).send ( { result: "error", error: err } );
 				res.send ( users );
 			} );
@@ -43,7 +46,7 @@ module.exports = function ( models, auth ) {
 	];
 
 	self.update = [
-		passport.authenticate ( oauth1tokenstrategy, { session: false } ),
+		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
 			if ( req.param ( "firstName" ) )
 				req.user.firstName = req.param ( "firstName" );
@@ -69,19 +72,19 @@ module.exports = function ( models, auth ) {
 			password: req.param ( "password"),
 			email: req.param ( "email" )
 		};
-		users.create ( newuser, function ( err, user ) {
+		Users.create ( newuser, function ( err, user ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
 			res.status ( 201 ).send ( user );
 		} );
 	}
 
 	self.delete = [
-		passport.authenticate( oauth1tokenstrategy, { session: false } ),
+		passport.authenticate( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
 			var chainer = new QueryChainer ( );
-			chainer.add ( oauth1requesttokens, "destroy", null, { user: req.user.id } );
-			chainer.add ( oauth1accesstokens, "destroy", null, { user: req.user.id } );
-			chainer.add ( users, "destroy", null, { id: req.user.id } );
+			chainer.add ( OAuth1RequestTokens, "destroy", null, { user: req.user.id } );
+			chainer.add ( OAuth1AccessTokens, "destroy", null, { user: req.user.id } );
+			chainer.add ( Users, "destroy", null, { id: req.user.id } );
 			chainer.run ( function ( errors ) {
 				if ( errors ) return res.status ( 500 ).send ( { result: "error", errors: errors } );
 				res.send ( { result: "ok" } )

@@ -31,8 +31,8 @@ module.exports = function ( waterline, adapter ) {
 				unique: true
 			},
 			// associations
-			oauth1requesttokens: { collection: "oauth1requesttokens" },
-			oauth1accesstokens: { collection: "oauth1accesstokens" },
+			oauth1RequestTokens: { collection: "oauth1requesttokens" },
+			oauth1AccessTokens: { collection: "oauth1accesstokens" },
 
 			// instance methods
 			fullName: function ( ) {

@@ -3,7 +3,14 @@
 
 var Waterline = require ( "waterline" );
 var _ = require ( "lodash" );
-var QueryChainer = require ( "../utils" ).QueryChainer;
+
+var Utils = require ( "../utils/" );
+var QueryChainer = Utils.QueryChainer;
+
+var Privacy = require ( "./privacy" );
+var Status = require ( "./status" );
+var User = require ( "./User" );
+var OAuth = require ( "./oauth/" );
 
 module.exports.init = function ( conf, callback ) {
 
@@ -24,22 +31,16 @@ module.exports.init = function ( conf, callback ) {
 	// Models for Nodoovent
 	// var Comment = require ( "./comment" ) ( schema );
 	// var Group = require ( "./group" ) ( schema );
-	require ( "./privacy" ) ( waterline, adapter, conf );
-	require ( "./status" ) ( waterline, adapter, conf );
+	Privacy ( waterline, adapter, conf );
+	Status ( waterline, adapter, conf );
 	// var Tag = require ( "./tag" ) ( schema );
-	// var Todo = require ( "./todo" ) ( schema );
 	// var TodosList = require ( "./todolist" ) ( schema );
-	require ( "./user" ) ( waterline, adapter );
-	// Associations for Nodoovent
-	// User.hasAndBelongsToMany ( User, { as: "contacts" } );
-	// User.hasMany ( Todo, { as: "todos", foreignKey: "creator" } );
-	// Privacy.hasMany ( Todo, { as: "todos", foreignKey: "privacy" } );
-	// Status.hasMany ( Todo, { as: "todos", foreignKey: "status" } );
+	User ( waterline, adapter );
 
 
 
 	// add authentication models
-	require ( "./oauth" ) ( waterline, adapter );
+	OAuth ( waterline, adapter );
 
 	var adapters = { };
 	adapters[adapter.name] = adapter;

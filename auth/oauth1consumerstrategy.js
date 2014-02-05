@@ -5,14 +5,15 @@
  *	It is employed to protect the request_token and access_token endpoint.
  */
 
-var ConsumerStrategy = require ( "passport-http-oauth" ).ConsumerStrategy;
+var PassportHttpOAuth = require ( "passport-http-oauth" );
+var ConsumerStrategy = PassportHttpOAuth.ConsumerStrategy;
 
 module.exports.name = "OAuth1 Consumer";
 
 module.exports.init = function ( models ) {
 
-	var oauth1clients = models.oauth1clients;
-	var oauth1requesttokens = models.oauth1requesttokens;
+	var OAuth1Clients = models.oauth1clients;
+	var OAuth1RequestTokens = models.oauth1requesttokens;
 
 	return new ConsumerStrategy (
 		/*	
@@ -20,7 +21,7 @@ module.exports.init = function ( models ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			oauth1clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
+			OAuth1Clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
 				if ( !client ) return callback ( null, false );
 				callback ( null, client, client.consumerKey );
@@ -31,7 +32,7 @@ module.exports.init = function ( models ) {
 		 *	Finds a request token, for get an access token
 		 */
 		function ( requestToken, callback ) {
-			oauth1requesttokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
+			OAuth1RequestTokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
 				if ( !token ) return callback ( null, false );
 				callback ( null, token.secret, token );

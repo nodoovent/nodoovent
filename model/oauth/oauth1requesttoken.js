@@ -22,7 +22,7 @@ module.exports = function ( waterline, adapter ) {
 			verifier: { type: "string" },
 			approved: { type: "boolean" },
 			// associations
-			oauth1client: { model: "oauth1clients" },
+			oauth1Client: { model: "oauth1clients" },
 			user: { model: "users" }
 		}
 	} );

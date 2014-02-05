@@ -5,21 +5,21 @@
  */
 
 var passport = require ( "passport" );
-var LocalStrategy = require ( "passport-local" ).Strategy;
-
+var PassportLocal = require ( "passport-local" );
+var LocalStrategy = PassportLocal.Strategy;
 
  module.exports.name = "Local";
 
  module.exports.init = function ( models ) {
 
- 	var users = models.users;
+ 	var Users = models.users;
 
  	passport.serializeUser ( function ( user, callback ) {
  		callback ( null, user.id );
  	} );
 
  	passport.deserializeUser ( function ( id, callback ) {
- 		users.findOne ( id ).exec ( function ( err, user ) {
+ 		Users.findOne ( id ).exec ( function ( err, user ) {
  			if ( err ) return callback ( err );
  			if ( !user ) return callback ( "User not found" );
  			callback ( null, user );
@@ -32,7 +32,7 @@ var LocalStrategy = require ( "passport-local" ).Strategy;
 	 		passwordField: "password"
 	 	},
  		function ( login, password, callback ) {
- 			users.findOne ( ).where ( { login: login, password: password } ).exec ( function ( err, user ) {
+ 			Users.findOne ( ).where ( { login: login, password: password } ).exec ( function ( err, user ) {
  				if ( err ) return callback ( err );
  				if ( user ) return callback ( null, false );
  				callback ( null, user );

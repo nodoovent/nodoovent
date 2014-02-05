@@ -12,9 +12,9 @@ module.exports.name = "OAuth1 Token";
 
 module.exports.init = function ( models ) {
 
-	var oauth1clients = models.oauth1clients;
-	var oauth1accesstokens = models.oauth1accesstokens;
-	var users = models.users;
+	var OAuth1Clients = models.oauth1clients;
+	var OAuth1AccessTokens = models.oauth1accesstokens;
+	var Users = models.users;
 
 	return new TokenStrategy (
 		/*
@@ -22,7 +22,7 @@ module.exports.init = function ( models ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			oauth1clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
+			OAuth1Clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
 				if ( !client ) return callback ( null, false );
 				callback ( null, client, client.consumerKey );
@@ -33,10 +33,10 @@ module.exports.init = function ( models ) {
 		 *	Verify the access token
 		 */
 		function ( accessToken, callback ) {
-			oauth1accesstokens.findOne ( ).where ( { token: accessToken } ).exec ( function ( err, token ) {
+			OAuth1AccessTokens.findOne ( ).where ( { token: accessToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
 				if ( !token ) return callback ( null, false );
-				users.findOne ( token.user ).exec ( function ( err, user ) {
+				Users.findOne ( token.user ).exec ( function ( err, user ) {
 					if ( err ) return callback ( err );
 					if ( !user ) return callback ( "No User found" );
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission model)

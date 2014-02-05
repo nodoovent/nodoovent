@@ -20,9 +20,9 @@ module.exports = function ( waterline, adapter ) {
 				required: true
 			},
 			// associations
-			oauth1requesttokens: { collection: "oauth1requesttokens" },
-			oauth1accesstokens: { collection: "oauth1accesstokens" },
-			developeraccount: { model: "developeraccounts" }
+			oauth1RequestTokens: { collection: "oauth1requesttokens" },
+			oauth1AccessTokens: { collection: "oauth1accesstokens" },
+			developerAccount: { model: "developeraccounts" }
 		}
 	} );
 

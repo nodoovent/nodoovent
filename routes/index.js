@@ -1,11 +1,11 @@
 var _ = require ( "lodash" );
 
-var privacy = require ( "./privacy" );
-var status = require ( "./status" );
+var Privacy = require ( "./privacy" );
+var Status = require ( "./status" );
 // var tag = require ( "./tag" );
 // var todo = require ( "./todo" );
-var user = require ( "./user" );
-var oauth1 = require ( "./oauth1" );
+var User = require ( "./user" );
+var OAuth1 = require ( "./oauth1" );
 
 
 module.exports = function ( models, auth, action ) {
@@ -26,12 +26,12 @@ module.exports = function ( models, auth, action ) {
 		}
 	}
 
-	self.privacy = new privacy ( self.models, self.auth, self.action );
-	self.status = new status ( self.models, self.auth, self.action );
+	self.privacy = new Privacy ( self.models, self.auth, self.action );
+	self.status = new Status ( self.models, self.auth, self.action );
 	// self.tag = new tag ( self.models, self.auth, self.action );
 	// self.todo = new todo ( self.models, self.auth, self.action );
-	self.user = new user ( self.models, self.auth, self.action );
-	self.oauth1 = new oauth1 ( self.models, self.auth, self.action );
+	self.user = new User ( self.models, self.auth, self.action );
+	self.oauth1 = new OAuth1 ( self.models, self.auth, self.action );
 
 	_.extend ( self.routes, self.privacy.routes );
 	_.extend ( self.routes, self.status.routes );

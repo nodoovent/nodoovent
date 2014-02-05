@@ -15,8 +15,8 @@ module.exports = function ( waterline, adapter ) {
 				required: true
 			},
 			// associations
-			clientpermissions: { collection: "clientpermissions" },
-			oauth1client: { model: "oauth1clients" },
+			clientPermissions: { collection: "clientpermissions" },
+			oauth1Client: { model: "oauth1clients" },
 			user: { model: "users" }
 		}
 	} );

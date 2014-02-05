@@ -2,16 +2,19 @@
  * Module dependencies.
  */
 
-var express = require ( "express" );
 var path = require ( "path" );
+
+var express = require ( "express" );
 var passport = require ( "passport" );
 
 var conf = require ( "./conf" );
-var routebuilder = require ( "./utils" ).RouteBuilder;
+var utils = require ( "./utils" );
 var routes = require ( "./routes" );
 var models = require ( "./model" );
 var auth = require ( "./auth" );
 var actions = require ( "./action" );
+
+var routebuilder = utils.RouteBuilder;
 
 module.exports = function ( callback ) {
 	var nodoovent = { };
