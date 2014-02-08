@@ -34,7 +34,7 @@ var LocalStrategy = PassportLocal.Strategy;
  		function ( login, password, callback ) {
  			Users.findOne ( ).where ( { login: login, password: password } ).exec ( function ( err, user ) {
  				if ( err ) return callback ( err );
- 				if ( user ) return callback ( null, false );
+ 				if ( !user ) return callback ( null, false );
  				callback ( null, user );
  			} );
  		}
