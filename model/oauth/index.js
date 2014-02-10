@@ -4,12 +4,12 @@ var OAuth1AccessToken = require ( "./oauth1accesstoken" );
 var OAuth1Client = require ( "./oauth1client" );
 var OAuth1RequestToken = require ( "./oauth1requesttoken" );
 
-module.exports = function ( waterline, adapter ) {
+module.exports = function ( waterline, adapter, conf ) {
 
-	ClientPermission ( waterline, adapter );
-	DeveloperAccount ( waterline, adapter );
-	OAuth1AccessToken ( waterline, adapter );
-	OAuth1Client ( waterline, adapter );
-	OAuth1RequestToken ( waterline, adapter );
+	ClientPermission ( waterline, adapter, conf );
+	DeveloperAccount ( waterline, adapter, conf );
+	OAuth1AccessToken ( waterline, adapter, conf );
+	OAuth1Client ( waterline, adapter, conf );
+	OAuth1RequestToken ( waterline, adapter, conf );
 
 }

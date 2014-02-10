@@ -3,22 +3,36 @@
  *
  *	An action to do ....
  */
+ 
+var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
-module.exports = function ( schema ) {
-	
-	var Todo = schema.define ( 
-		"Todo",
-		{
-			name: { type: String },
-			description: { type: String },
-			dueAt: { type: Date },
-			createdAt: { type: Date, default: function ( ) { return new Date; } },
-			updatedAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "todos";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
+	var Todo = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
+		attributes: {
+			name: {
+				type: "string",
+				required: true,
+			},
+			description: { type: "string" },
+			dueAt: { type: "date" },
+			// associations
+			author: { model: "users" },
+			status: { model: "status" },
+			privacy: { model: "privacies" }
 		}
-	);
+	} );
 
-	Todo.validatesPresenceOf ( "name", "createdAt", "updatedAt" );
+	waterline.loadCollection ( Todo );
 
 	return Todo;
-
 }

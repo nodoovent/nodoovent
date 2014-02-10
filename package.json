@@ -36,8 +36,8 @@
     "connect-ensure-login": "~0.1.1",
     "passport-local": "~0.1.6",
     "lodash": "~2.4.1",
-    "waterline": "git://github.com/balderdashy/waterline.git#associations",
-    "sails-disk": "git://github.com/balderdashy/sails-disk.git#associations"
+    "waterline": "git://github.com/balderdashy/waterline.git#v0.10",
+    "sails-disk": "git://github.com/balderdashy/sails-disk.git#v0.10"
   },
   "license": "MIT",
   "engine": {

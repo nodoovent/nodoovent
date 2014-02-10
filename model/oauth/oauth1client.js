@@ -1,10 +1,17 @@
 var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
-module.exports = function ( waterline, adapter ) {
-	
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "oauth1clients";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
 	var OAuth1Client = Waterline.Collection.extend ( {
-		adapter: adapter.name,
-		tableName: "oauth1clients", // not use maj for table name - waterline bug
+		identity: identity,
+		connection: connection,
 		attributes: {
 			name: {
 				type: "string",
@@ -20,8 +27,8 @@ module.exports = function ( waterline, adapter ) {
 				required: true
 			},
 			// associations
-			oauth1RequestTokens: { collection: "oauth1requesttokens" },
-			oauth1AccessTokens: { collection: "oauth1accesstokens" },
+			oauth1RequestTokens: { collection: "oauth1requesttokens", via: "oauth1Client" },
+			oauth1AccessTokens: { collection: "oauth1accesstokens", via: "oauth1Client" },
 			developerAccount: { model: "developeraccounts" }
 		}
 	} );

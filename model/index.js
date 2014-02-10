@@ -9,6 +9,7 @@ var QueryChainer = Utils.QueryChainer;
 
 var Privacy = require ( "./privacy" );
 var Status = require ( "./status" );
+var Todo = require ( "./todo" );
 var User = require ( "./User" );
 var OAuth = require ( "./oauth/" );
 
@@ -16,11 +17,15 @@ module.exports.init = function ( conf, callback ) {
 
 	callback = callback || function ( ) { };
 
-	var engine = conf.db.engine;
-	var adapter = require ( conf.db[engine].module );
-	adapter.config = _.merge ( { }, adapter.defaults );
-	adapter.config = _.merge ( adapter.config, conf.db[engine].params );
-	adapter.name = engine;
+	var defaultAdapter = conf.db.defaultAdapter;
+	var adapters = { "default": require ( conf.db.adapters[defaultAdapter] ) };
+	for ( var adapter in conf.db.adapters )
+		adapters[adapter] = require ( conf.db.adapters[adapter] );
+
+	var conn = conf.db.connections;
+	var connections = { };
+	for ( var i in conf.db.connections )
+		connections[conn[i]] = conf.db[conn[i]];
 
 	var waterline = new Waterline ( );
 
@@ -34,18 +39,20 @@ module.exports.init = function ( conf, callback ) {
 	Privacy ( waterline, adapter, conf );
 	Status ( waterline, adapter, conf );
 	// var Tag = require ( "./tag" ) ( schema );
+	Todo ( waterline, adapter, conf );
 	// var TodosList = require ( "./todolist" ) ( schema );
-	User ( waterline, adapter );
+	User ( waterline, adapter, conf );
 
 
 
 	// add authentication models
-	OAuth ( waterline, adapter );
+	OAuth ( waterline, adapter, conf );
 
-	var adapters = { };
-	adapters[adapter.name] = adapter;
-	waterline.initialize ( { adapters: adapters }, function ( err, collections ) {
+	var options = { adapters: adapters, connections: connections };
+	waterline.initialize ( options, function ( err, models ) {
 		if ( err ) return callback ( [ err ] );
+
+		var collections = models.collections;
 
 		var status = [];
 		for ( var k in conf.status ) status.push ( { name: conf.status[k] } );
@@ -72,7 +79,7 @@ module.exports.init = function ( conf, callback ) {
 			if ( errors ) return callback ( errors );
 			chainerAdd.run ( function ( errors ) {
 				if ( errors ) return callback ( errors );
-				callback ( null, collections );
+				callback ( null, collections, models.connections );
 			} );
 		} );
 	} );

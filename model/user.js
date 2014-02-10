@@ -5,10 +5,19 @@
  */
  
 var Waterline = require ( "waterline" );
- 
-module.exports = function ( waterline, adapter ) {
+var _ = require ( "lodash" );
+
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "users";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
 
 	var User = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
 		adapter: adapter.name,
 		tableName: "users", // not use maj for table name - waterline bug
 		attributes: {
@@ -30,9 +39,13 @@ module.exports = function ( waterline, adapter ) {
 				required: true,
 				unique: true
 			},
+
 			// associations
-			oauth1RequestTokens: { collection: "oauth1requesttokens" },
-			oauth1AccessTokens: { collection: "oauth1accesstokens" },
+			authoredTodos: { collection: "todos", via: "author" },
+
+			// associations oauth
+			oauth1RequestTokens: { collection: "oauth1requesttokens", via: "user" },
+			oauth1AccessTokens: { collection: "oauth1accesstokens", via: "user" },
 
 			// instance methods
 			fullName: function ( ) {
@@ -41,6 +54,9 @@ module.exports = function ( waterline, adapter ) {
 
 			toJSON: function ( ) {
 				delete this.password;
+				delete this.authoredTodos;
+				delete this.oauth1AccessTokens;
+				delete this.oauth1RequestTokens;
 				return this;
 			}
 		}

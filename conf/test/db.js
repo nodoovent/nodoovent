@@ -10,20 +10,29 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	engine: "memory",
+	connections: [ "localDisk" ],
+	defaultConnection: "localDisk",
+
+	// use a specific engine for a model (different as default)
+	models: { },
 
 	// Disk db storage
-	disk: {
-		module: "sails-disk",
-		params: {
-			filePath: path.join ( __dirname, "../nodoovent.test.db.json" ) 
-		}
+	localDisk: {
+		adapter: "disk",
+		filePath: path.join ( __dirname, "../test/" ) 
 	},
 
 	// Memory db storage
 	memory: {
-		module: "sails-memory",
-		params: { }
-	}
+		adapter: "memory"
+	},
+
+	// available adapter list
+	adapters: {
+		disk: "sails-disk",
+		memory: "sails-memory"
+	},
+
+	defaultAdapter: "disk"
 
 };

@@ -5,10 +5,19 @@
  */
 
 var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
 module.exports = function ( waterline, adapter, conf ) {
 
+	var identity = "status";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
 	var Status = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
 		adapter: adapter.name,
 		tableName: "status", // not use maj for table name - waterline bug
 		attributes: {
@@ -17,7 +26,9 @@ module.exports = function ( waterline, adapter, conf ) {
 				required: true,
 				unique: true,
 				in: conf.status
-			}
+			},
+			// associations
+			todos: { collections: "todos", via: "status" }
 		}
 	} );
 

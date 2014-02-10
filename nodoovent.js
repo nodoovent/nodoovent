@@ -51,9 +51,10 @@ module.exports = function ( callback ) {
 	nodoovent.conf = conf ( app.get ( "env" ) );
 
 	// init model
-	models.init ( nodoovent.conf, function ( err, models ) {
+	models.init ( nodoovent.conf, function ( err, models, connections ) {
 		if ( err ) return callback ( err );
 		nodoovent.models = models;
+		nodoovent.connections = connections;
 
 		nodoovent.auth = new auth ( nodoovent.models );
 		nodoovent.actions = new actions ( nodoovent.models, nodoovent.auth );
