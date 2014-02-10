@@ -10,8 +10,8 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	connections: [ "localDisk" ],
-	defaultConnection: "localDisk",
+	connections: [ "memory" ],
+	defaultConnection: "memory",
 
 	// use a specific engine for a model (different as default)
 	models: { },

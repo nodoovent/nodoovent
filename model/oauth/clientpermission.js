@@ -22,7 +22,7 @@ module.exports = function ( waterline, adapter, conf ) {
 				required: true
 			},
 			// associations
-			// oauth1AccessTokens: { collection: "oauth1accesstokens", via: "clientPermissions" }
+			// oauth1AccessTokens: { collection: "oauth1accesstokens", via: "clientPermissions" } // error with n to n associations
 		}
 	} );
 
