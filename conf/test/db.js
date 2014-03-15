@@ -10,8 +10,8 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	connections: [ "memory" ],
-	defaultConnection: "memory",
+	connections: [ "localDisk" ],
+	defaultConnection: "localDisk",
 
 	// use a specific engine for a model (different as default)
 	models: { },
@@ -19,18 +19,18 @@ module.exports = {
 	// Disk db storage
 	localDisk: {
 		adapter: "disk",
-		filePath: path.join ( __dirname, "../test/" ) 
+		filePath: path.join ( __dirname, "../../test/" ) 
 	},
 
 	// Memory db storage
-	memory: {
+	mem: {
 		adapter: "memory"
 	},
 
 	// available adapter list
 	adapters: {
-		disk: "sails-disk",
-		memory: "sails-memory"
+		disk: "sails-disk"
+		// memory: "sails-memory"
 	},
 
 	defaultAdapter: "disk"

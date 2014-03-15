@@ -23,14 +23,14 @@ module.exports = {
 	},
 
 	// Memory db storage
-	memory: {
+	mem: {
 		adapter: "memory"
 	},
 
 	// available adapter list
 	adapters: {
-		disk: "sails-disk",
-		memory: "sails-memory"
+		disk: "sails-disk"
+		// memory: "sails-memory"
 	},
 
 	defaultAdapter: "disk"
