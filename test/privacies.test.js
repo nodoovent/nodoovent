@@ -1,5 +1,5 @@
 var should = require ( "should" );
-var request = require ( "supertest" );
+var supertest = require ( "supertest" );
 
 /*
  *	Status tests uses current Nodoovent configuration (see conf folder)
@@ -12,7 +12,7 @@ module.exports = function ( nodoovent, url ) {
 	describe ( "Test /privacies end points:", function ( ) {
 
 		it ( "should have /privacies end point", function ( callback ) {
-			var req = request ( url ).get ( "/privacies" ).send ( );
+			var req = supertest ( url ).get ( "/privacies" ).send ( );
 			req.end ( function ( err, res ) {
 				if ( err ) return callback ( err );
 				res.should.have.status ( 200 );
@@ -30,7 +30,7 @@ module.exports = function ( nodoovent, url ) {
 		// test all end points /privacies/id
 		var TestPrivaciesWithId = function ( i ) {
 			it ( "should have /privacies/" + ( i + 1 ) + " end point (" + privacies[i] + ")", function ( callback ) {
-				var req = request ( url ).get ( "/privacies/" + ( i + 1 ) ).send ( );
+				var req = supertest ( url ).get ( "/privacies/" + ( i + 1 ) ).send ( );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -45,7 +45,7 @@ module.exports = function ( nodoovent, url ) {
 		for ( var i = 0; i < lprivacies; i++ ) new TestPrivaciesWithId ( i );
 
 		it ( "should not have /privacies/" + ( lprivacies + 1 ) + " end point and should return 404 http code", function ( callback ) {
-			var req = request ( url ).get ( "/privacies/" + ( lprivacies + 1 ) ).send ( );
+			var req = supertest ( url ).get ( "/privacies/" + ( lprivacies + 1 ) ).send ( );
 			req.end ( function ( err, res ) {
 				if ( err )  return callback ( err );
 				res.should.have.status ( 404 );
