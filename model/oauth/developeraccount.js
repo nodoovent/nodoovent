@@ -1,19 +1,41 @@
-module.exports = function ( schema ) {
+var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
-	var DeveloperAccount = schema.define ( 
-		"DeveloperAccount",
-		{
-			firstName: { type: String },
-			lastName: { type: String },
-			organizationName: { type: String },
-			email: { type: String },
-			password: { type: String },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "developeraccounts";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
+	var DeveloperAccount = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
+		attributes: {
+			firstName: { type: "string" },
+			lastName: { type: "string" },
+			organizationName: { type: "string" },
+			password: {
+				type: "string",
+				required: true,
+				minLength: 5
+			},
+			email: {
+				type: "email",
+				required: true,
+				unique: true
+			},
+			// associations
+			oauth1Clients: { collection: "oauth1clients", via: "developerAccount" }
 		}
-	);
+	} );
 
-	DeveloperAccount.validatesPresenceOf ( "password", "email" );
-	DeveloperAccount.validatesUniquenessOf ( "email", { message: "email is not unique" } );
+	// TODO : Add validation for firstName lastName and organizationName
+	// --> firstName and lastName with value and organizationName null
+	// --> firstName and lastName null and organizationName with value
+
+	waterline.loadCollection ( DeveloperAccount );
 
 	return DeveloperAccount;
 

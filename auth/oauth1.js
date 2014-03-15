@@ -2,19 +2,19 @@ var oauthorize = require ( "oauthorize" );
 var passport = require ( "passport" );
 var login = require ( "connect-ensure-login" );
 
-var utils = require ( "../utils" );
+var Utils = require ( "../utils/" );
 var OAuth1ConsumerStrategy = require ( "./oauth1consumerstrategy" );
 
 
-module.exports = function ( schema ) {
+module.exports = function ( models ) {
 	var self = this;
 
-	self.schema = schema;
+	self.models = models;
 	self.oauth1server = oauthorize.createServer ( );
 
-	var OAuth1Client = schema.models.OAuth1Client;
-	var OAuth1RequestToken = schema.models.OAuth1RequestToken;
-	var OAuth1AccessToken = schema.models.OAuth1AccessToken;
+	var OAuth1Clients = models.oauth1clients;
+	var OAuth1RequestTokens = models.oauth1requesttokens;
+	var OAuth1AccessTokens = models.oauth1accesstokens;
 
 	/*
 	 *	Register serialialization and deserialization functions
@@ -25,9 +25,9 @@ module.exports = function ( schema ) {
 	} );
 
 	self.oauth1server.deserializeClient ( function ( clientid, callback ) {
-		OAuth1Client.find ( clientid, function ( err, client ) {
+		OAuth1Clients.findOne ( clientid ).exec ( function ( err, client ) {
 			if ( err ) return callback ( err );
-			if ( !client ) return callback ( "No OAuth1Client found" );
+			if ( !client ) return callback ( "No OAuth1 Client found" );
 			callback ( null, client );
 		} );
 	} );
@@ -43,12 +43,12 @@ module.exports = function ( schema ) {
 		passport.authenticate ( OAuth1ConsumerStrategy.name, { session: false } ),
 		self.oauth1server.requestToken ( function ( client, callbackURL, callback ) {
 			var duration = 15 * 60 * 60 * 1000;	
-			var token = utils.uid ( 8 );		
-			var secret = utils.uid ( 32 );		
+			var token = Utils.uid ( 8 );		
+			var secret = Utils.uid ( 32 );		
 
 			// build OAuth1RequestToken
-			var requesttoken = { token: token, secret: secret, callbackUrl: callbackURL, timeout: new Date ( ).getTime ( ) + duration, client: client.id };
-			OAuth1RequestToken.create ( requesttoken, function ( err, requesttoken ) {
+			var requesttoken = { token: token, secret: secret, callbackUrl: callbackURL, timeout: new Date ( new Date ( ).getTime ( ) + duration ), oauth1Client: client.id };
+			OAuth1RequestTokens.create ( requesttoken, function ( err, requesttoken ) {
 				if ( err ) return callback ( err );
 				callback ( null, token, secret );
 			} );
@@ -71,14 +71,14 @@ module.exports = function ( schema ) {
 			},
 			function ( client, requestToken, token, callback ) {
 				if ( !token.approved ) return callback ( null, false );
-				if ( client.id !== token.client ) return callback ( null, false );
+				if ( client.id !== token.oauth1Client ) return callback ( null, false );
 
-				var accesstoken = utils.uid ( 16 );
-				var accesssecret = utils.uid ( 64 );
+				var accesstoken = Utils.uid ( 16 );
+				var accesssecret = Utils.uid ( 64 );
 
 				// create access token
-				var access = { token: accesstoken, secret: accesssecret, client: client.id, user: token.user };
-				OAuth1AccessToken.create ( access, function ( err, access ) {
+				var access = { token: accesstoken, secret: accesssecret, oauth1Client: client.id, user: token.user };
+				OAuth1AccessTokens.create ( access, function ( err, access ) {
 					if ( err ) return callback ( err );
 					callback ( null, accesstoken, accesssecret );
 				} );
@@ -99,14 +99,12 @@ module.exports = function ( schema ) {
 	self.userAuthorization = [
 		login.ensureLoggedIn ( ), // redirect to connect view
 		self.oauth1server.userAuthorization ( function ( requestToken, callback ) {
-			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
+			OAuth1RequestTokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( tokens.length == 0 ) return callback ( "No OAuth1RequestToken found with token=" + requestToken );
-				if ( tokens.length > 1 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
-				var token = tokens[0];
-				OAuth1Client.find ( token.client, function ( err, client ) {
+				if ( !token ) return callback ( "No OAuth1 Request Token found" );
+				OAuth1Clients.findOne ( token.oauth1Client ).exec ( function ( err, client ) {
 					if ( err ) return callback ( err );
-					if ( !client ) return callback ( "No OAuth1client found with id=" + token.client );
+					if ( !client ) return callback ( "No OAuth1 Client found" );
 					callback ( null, client, token.callbackUrl );
 				} );
 			} );
@@ -124,17 +122,21 @@ module.exports = function ( schema ) {
 		login.ensureLoggedIn ( ), // redirect to connect view (I think :D)
 		self.oauth1server.userDecision ( function ( requestToken, user, res, callback ) {
 			// get requestToken
-			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
+			OAuth1RequestTokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( tokens.length == 0 ) return callback ( "No OAuth1RequestToken found with token=" + requestToken );
-				if ( tokens.length > 1 ) return callback ( "Many OAuth1RequestToken with the same token are found, it's weird !" );
-				var token = tokens[0];
-				// update values
-				token.verifier = utils.uid ( 8 );
+				if ( !token ) return callback ( "No OAuth1 Request Token found" );
+
+				// don't pass id to update
+				var id = { id: token.id };
+				delete token.id;
+
+				token.verifier = Utils.uid ( 8 );
 				token.approved = true;
 				token.user = user.id;
-				token.save ( function ( err, token ) {
-					if ( err ) return callback ( err );
+
+				OAuth1RequestTokens.update ( id, token, function ( err, tokens ) {
+					if ( err ) return callack ( err );
+					var token = tokens[0];
 					callback ( null, token.verifier );
 				} );
 			} );

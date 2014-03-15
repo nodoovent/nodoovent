@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "start": "node app.js",
-    "test": "mocha"
+    "test": "node test/index.js"
   },
   "repository": {
     "type": "git",
@@ -35,9 +35,9 @@
     "oauthorize": "~0.1.0",
     "connect-ensure-login": "~0.1.1",
     "passport-local": "~0.1.6",
-    "jugglingdb": "~0.2.4",
-    "jugglingdb-sqlite3": "0.0.3",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "sails-disk": "^0.10.0-rc3",
+    "waterline": "^0.10.0-rc4"
   },
   "license": "MIT",
   "engine": {

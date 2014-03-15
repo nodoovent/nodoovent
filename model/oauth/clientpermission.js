@@ -1,38 +1,33 @@
-/*
- *	Todo
- *
- *	An action to do ....
- */
- 
 var Waterline = require ( "waterline" );
 var _ = require ( "lodash" );
 
 module.exports = function ( waterline, adapter, conf ) {
 
-	var identity = "todos";
+	var identity = "clientpermissions";
 
 	var connection = conf.db.defaultConnection;
 	if ( _.has ( conf.models, identity ) )
 		connection = conf.models[identity];
 
-	var Todo = Waterline.Collection.extend ( {
+	var ClientPermission = Waterline.Collection.extend ( {
 		identity: identity,
 		connection: connection,
 		attributes: {
 			name: {
 				type: "string",
-				required: true,
+				required: true
 			},
-			description: { type: "string" },
-			dueAt: { type: "date" },
+			unlock: {
+				type: "string",	// good format ???
+				required: true
+			},
 			// associations
-			author: { model: "users" },
-			status: { model: "status" },
-			privacy: { model: "privacies" }
+			// oauth1AccessTokens: { collection: "oauth1accesstokens", via: "clientPermissions" } // error with n to n associations
 		}
 	} );
 
-	waterline.loadCollection ( Todo );
+	waterline.loadCollection ( ClientPermission );
 
-	return Todo;
+	return ClientPermission;
+
 }

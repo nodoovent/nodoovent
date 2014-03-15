@@ -1,22 +1,20 @@
 var passport = require ( "passport" );
 
 var OAuth1 = require ( "./oauth1" );
-
 var LocalStrategy = require ( "./localstrategy" );
 var OAuth1ConsumerStrategy = require ( "./oauth1consumerstrategy" );
 var OAuth1TokenStrategy = require ( "./oauth1tokenstrategy" );
 
 
-module.exports = function ( schema ) {
-	var self = this;
+module.exports = function ( models ) {
 
-	self.localstrategy = LocalStrategy.init ( schema );
-	self.oauth1consumerstrategy = OAuth1ConsumerStrategy.init ( schema );
-	self.oauth1tokenstrategy = OAuth1TokenStrategy.init ( schema );
+	var localStrategy = LocalStrategy.init ( models );
+	var oauth1ConsumerStrategy = OAuth1ConsumerStrategy.init ( models );
+	var oauth1TokenStrategy = OAuth1TokenStrategy.init ( models );
 
-	passport.use ( LocalStrategy.name, self.localstrategy );
-	passport.use ( OAuth1ConsumerStrategy.name, self.oauth1consumerstrategy );
-	passport.use ( OAuth1TokenStrategy.name, self.oauth1tokenstrategy );
+	passport.use ( LocalStrategy.name, localStrategy );
+	passport.use ( OAuth1ConsumerStrategy.name, oauth1ConsumerStrategy );
+	passport.use ( OAuth1TokenStrategy.name, oauth1TokenStrategy );
 
-	self.oauth1 = new OAuth1 ( schema ); 
+	this.oauth1 = new OAuth1 ( models ); 
 };

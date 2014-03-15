@@ -5,14 +5,15 @@
  *	It is employed to protect the request_token and access_token endpoint.
  */
 
-var ConsumerStrategy = require ( "passport-http-oauth" ).ConsumerStrategy;
+var PassportHttpOAuth = require ( "passport-http-oauth" );
+var ConsumerStrategy = PassportHttpOAuth.ConsumerStrategy;
 
 module.exports.name = "OAuth1 Consumer";
 
-module.exports.init = function ( schema ) {
+module.exports.init = function ( models ) {
 
-	var OAuth1Client = schema.models.OAuth1Client;
-	var OAuth1RequestToken = schema.models.OAuth1RequestToken;
+	var OAuth1Clients = models.oauth1clients;
+	var OAuth1RequestTokens = models.oauth1requesttokens;
 
 	return new ConsumerStrategy (
 		/*	
@@ -20,12 +21,10 @@ module.exports.init = function ( schema ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			OAuth1Client.all ( { where: { consumerKey: consumerKey } }, function ( err, clients ) {
+			OAuth1Clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
-				if ( clients.length > 1 ) return callback ( "Many OAuth1 clients with same consumer key and secret, it's weird !" );
-				if ( clients.length == 0 ) return callback ( "No OAuth1 client found" );
-				var client = clients[0];
-				callback ( null, client, client.consumerSecret );
+				if ( !client ) return callback ( null, false );
+				callback ( null, client, client.consumerKey );
 			} );
 		},
 		/*
@@ -33,13 +32,11 @@ module.exports.init = function ( schema ) {
 		 *	Finds a request token, for get an access token
 		 */
 		function ( requestToken, callback ) {
-			OAuth1RequestToken.all ( { where: { token: requestToken } }, function ( err, tokens ) {
+			OAuth1RequestTokens.findOne ( ).where ( { token: requestToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( tokens.length > 1 ) return callback ( "Many OAuth1 request tokens with the same token are found, it's weird !" );
-				if ( tokens.length == 0 ) return callback ( "No OAut1 request token are found" );
-				var token = tokens[0];
+				if ( !token ) return callback ( null, false );
 				callback ( null, token.secret, token );
-			} );	
+			} );
 		},
 		/*
 		 *	validate callback

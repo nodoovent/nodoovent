@@ -10,11 +10,11 @@ var TokenStrategy = require ( "passport-http-oauth" ).TokenStrategy;
 
 module.exports.name = "OAuth1 Token";
 
-module.exports.init = function ( schema ) {
+module.exports.init = function ( models ) {
 
-	var OAuth1Client = schema.models.OAuth1Client;
-	var OAuth1AccessToken = schema.models.OAuth1AccessToken;
-	var User = schema.models.User;
+	var OAuth1Clients = models.oauth1clients;
+	var OAuth1AccessTokens = models.oauth1accesstokens;
+	var Users = models.users;
 
 	return new TokenStrategy (
 		/*
@@ -22,12 +22,10 @@ module.exports.init = function ( schema ) {
 		 *	Finds the client associated with the consumerKey 		
 		 */
 		function ( consumerKey, callback ) {
-			OAuth1Client.all ( { where: { consumerKey: consumerKey } }, function ( err, clients ) {
+			OAuth1Clients.findOne ( ).where ( { consumerKey: consumerKey } ).exec ( function ( err, client ) {
 				if ( err ) return callback ( err );
-				if ( clients.length > 1 ) return callback ( "Many OAuth1 clients with same consumer key and secret, it's weird !" );
-				if ( clients.length == 0 ) return callback ( "No OAuth1 client found" );
-				var client = clients[0];
-				callback ( null, client, client.consumerSecret );
+				if ( !client ) return callback ( null, false );
+				callback ( null, client, client.consumerKey );
 			} );
 		},
 		/*
@@ -35,14 +33,12 @@ module.exports.init = function ( schema ) {
 		 *	Verify the access token
 		 */
 		function ( accessToken, callback ) {
-			OAuth1AccessToken.all (  { where: { token: accessToken } }, function ( err, tokens ) {
+			OAuth1AccessTokens.findOne ( ).where ( { token: accessToken } ).exec ( function ( err, token ) {
 				if ( err ) return callback ( err );
-				if ( tokens.length > 1 ) return callback ( "Many OAuth1 access tokens, it's weird !" );
-				if ( tokens.length == 0 ) return callback ( );
-				var token = tokens[0];
-				User.find ( token.user, function ( err, user ) {
+				if ( !token ) return callback ( null, false );
+				Users.findOne ( token.user ).exec ( function ( err, user ) {
 					if ( err ) return callback ( err );
-					if ( !user ) return callback ( "No user found" );
+					if ( !user ) return callback ( "No User found" );
 					var info = { scope: "*" }; // no scope to keep it simple (for scope look about permission model)
 					callback ( null, user, token.secret, info );
 				} );

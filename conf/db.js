@@ -10,12 +10,29 @@ var path = require ( "path" );
 module.exports = {
 
 	// engine to use
-	engine: "sqlite3",
+	connections: [ "localDisk" ],
+	defaultConnection: "localDisk",
 
+	// use a specific engine for a model (different as default)
+	models: { },
 
-	// see jugglingdb sqlite3 adaptater doc
-	sqlite3: {
-		database: path.join ( __dirname, "../nodoovent.sqlite" ) 
-	}
+	// Disk db storage
+	localDisk: {
+		adapter: "disk",
+		filePath: path.join ( __dirname, "../" )
+	},
+
+	// Memory db storage
+	mem: {
+		adapter: "memory"
+	},
+
+	// available adapter list
+	adapters: {
+		disk: "sails-disk"
+		// memory: "sails-memory"
+	},
+
+	defaultAdapter: "disk"
 
 };

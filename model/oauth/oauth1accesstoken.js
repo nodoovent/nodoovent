@@ -1,15 +1,35 @@
-module.exports = function ( schema ) {
+var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
-	var OAuth1AccessToken = schema.define (
-		"OAuth1AccessToken",
-		{
-			token: { type: String },
-			secret: { type: String },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "oauth1accesstokens";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
+	var OAuth1AccessToken = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
+		attributes: {
+			token: {
+				type: "string",
+				required: true,
+				unique: true
+			},
+			secret: {
+				type: "string",
+				required: true
+			},
+			// associations
+			// clientPermissions: { collection: "clientpermissions", via: "oauth1AccessTokens" }, // error with n to n associations
+			oauth1Client: { model: "oauth1clients" },
+			user: { model: "users" }
 		}
-	);
+	} );
 
-	OAuth1AccessToken.validatesPresenceOf ( "token", "secret" );
+	waterline.loadCollection ( OAuth1AccessToken );
 
 	return OAuth1AccessToken;
 

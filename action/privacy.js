@@ -1,21 +1,21 @@
-module.exports = function ( schema, auth ) {
+module.exports = function ( models, auth ) {
 	var self = this;
 
-	self.schema = schema;
+	self.models = models;
 	self.auth = auth;
 
-	var Privacy = schema.models.Privacy;
+	var Privacies = models.privacies;
 
 	self.list = function ( req, res ) {
-		Privacy.all ( function ( err, privacies ) {
-			if ( err ) return res.send ( { message: "error", error: err } );
+		Privacies.find ( ).exec ( function ( err, privacies ) {
+			if ( err ) return res.status ( 500 ).send ( { message: "error", error: err } );
 			res.send ( privacies );
 		} );
 	}
 
 	self.getbyId = function ( req, res ) {
-		Privacy.find ( req.param ( "id" ), function ( err, privacy ) {
-			if ( err ) return res.send ( { message: "error", error: err } );
+		Privacies.findOne ( req.param ( "id" ) ).exec ( function ( err, privacy ) {
+			if ( err ) return res.status ( 500 ).send ( { message: "error", error: err } );
 			if ( !privacy ) res.status ( 404 ).send ( );
 			res.send ( privacy );
 		} );

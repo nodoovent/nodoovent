@@ -1,19 +1,41 @@
-module.exports = function ( schema ) {
+var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
 
-	var OAuth1RequestToken = schema.define (
-		"OAuth1RequestToken",
-		{
-			token: { type: String },
-			secret: { type: String },
-			callbackUrl: { type: String },
-			timeout: { type: Date },
-			verifier: { type: String },
-			approved: { type: Boolean, default: false },
-			createdAt: { type: Date, default: function ( ) { return new Date; } }
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "oauth1requesttokens";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
+	var OAuth1RequestToken = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
+		attributes: {
+			token: {
+				type: "string",
+				required: true,
+				unique: true
+			},
+			secret: {
+				type: "string",
+				required: true
+			},
+			callbackUrl: {
+				type: "string",
+				required: true
+			},
+			timeout: { type: "datetime" },
+			verifier: { type: "string" },
+			approved: { type: "boolean" },
+			// associations
+			oauth1Client: { model: "oauth1clients" },
+			user: { model: "users" }
 		}
-	);
+	} );
 
-	OAuth1RequestToken.validatesPresenceOf ( "token", "secret", "callbackUrl" );
+	waterline.loadCollection ( OAuth1RequestToken );
 
 	return OAuth1RequestToken;
 

@@ -3,26 +3,34 @@
  *
  *	privacy of a todo. Public or Private.
  */
-module.exports = function ( schema, conf ) {
 
-	var Privacy = schema.define ( 
-		"Privacy",
-		{
-			name: { type: String, index: true }
+var Waterline = require ( "waterline" );
+var _ = require ( "lodash" );
+
+module.exports = function ( waterline, adapter, conf ) {
+
+	var identity = "privacies";
+
+	var connection = conf.db.defaultConnection;
+	if ( _.has ( conf.models, identity ) )
+		connection = conf.models[identity];
+
+	var Privacy = Waterline.Collection.extend ( {
+		identity: identity,
+		connection: connection,
+		attributes: {
+			name: {
+				type: "string",
+				required: true,
+				unique: true,
+				in: conf.privacies
+			},
+			// associations
+			todos: { collection: "todos", via: "privacy" }
 		}
-	);
+	} );
 
-	Privacy.validatesPresenceOf ( "name" );
-	Privacy.validatesInclusionOf ( "name", { in: conf.privacies } );
-	Privacy.validatesUniquenessOf ( "name", { message: "name is not unique" } );
-
-	Privacy.prototype.toJSON = function ( ) {
-		if ( typeof this.id == "string" ) this.id = parseInt ( this.id, 10 );
-		return {
-			id: this.id,
-			name: this.name
-		};
-	}
+	waterline.loadCollection ( Privacy );
 
 	return Privacy;
 }

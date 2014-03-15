@@ -1,26 +1,15 @@
-module.exports = function ( schema ) {
+var ClientPermission = require ( "./clientpermission" );
+var DeveloperAccount = require ( "./developeraccount" );
+var OAuth1AccessToken = require ( "./oauth1accesstoken" );
+var OAuth1Client = require ( "./oauth1client" );
+var OAuth1RequestToken = require ( "./oauth1requesttoken" );
 
-	var User = schema.models.User;
+module.exports = function ( waterline, adapter, conf ) {
 
-	// model for auth
-	var DeveloperAccount = require ( "./developeraccount" ) ( schema );
-	var OAuth1AccessToken = require ( "./oauth1accesstoken" ) ( schema );
-	var OAuth1Client = require ( "./oauth1client" ) ( schema );
-	var OAuth1RequestToken = require ( "./oauth1requesttoken" ) ( schema );
-	var Permission = require ( "./permission" ) ( schema );
+	ClientPermission ( waterline, adapter, conf );
+	DeveloperAccount ( waterline, adapter, conf );
+	OAuth1AccessToken ( waterline, adapter, conf );
+	OAuth1Client ( waterline, adapter, conf );
+	OAuth1RequestToken ( waterline, adapter, conf );
 
-	// association
-	DeveloperAccount.hasMany ( OAuth1Client, { as: "clients", foreignKey: "developerAccount" } );
-	OAuth1Client.hasMany ( OAuth1RequestToken, { as: "resquestTokens", foreignKey: "client" } );
-	OAuth1Client.hasMany ( OAuth1AccessToken, { as: "accessTokens", foreignKey: "client" } );
-	OAuth1Client.belongsTo ( DeveloperAccount, { foreignKey: "developerAccount" } );
-	User.hasMany ( OAuth1RequestToken, { as: "requestTokens", foreignKey: "user" } );
-	User.hasMany ( OAuth1AccessToken, { as: "accessTokens", foreignKey: "user" } );
-	OAuth1AccessToken.hasAndBelongsToMany ( Permission, { as: "permissions" } );
-	OAuth1AccessToken.belongsTo ( OAuth1Client, { foreignKey: "client" } );
-	// OAuth1AccessToken.belongsTo ( User, { foreignKey: "user" } );
-	OAuth1RequestToken.belongsTo ( OAuth1Client, { foreignKey: "client" } );
-	// OAuth1RequestToken.belongsTo ( User, { foreignKey: "user" } );
-
-	return schema;
 }
