@@ -27,7 +27,7 @@ Nodoovent ( function ( err, nodoo ) {
 		mocha.ui ( "bdd" );
 		mocha.reporter ( "spec" );
 		mocha.globals ( [ nodoovent, NODE_ENV_OLD ] );
-		mocha.files = [ "./test/app.test.js" ];
+		mocha.files = [ "./test/app.test.js", "./test/datehelper.test.js" ];
 
 		mocha.run ( function ( err ) {
 			process.exit ( );

@@ -2,6 +2,7 @@ module.exports = {
 
 	uid: require ( "./uid" ),
 	RouteBuilder: require ( "./routebuilder" ),
-	QueryChainer: require ( "./waterline-querychainer" )
+	QueryChainer: require ( "./waterline-querychainer" ),
+	DateHelper: require ( "./datehelper" )
 
 }
