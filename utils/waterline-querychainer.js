@@ -5,7 +5,7 @@
 
  var _ = require ( "lodash" );
 
- module.exports = function ( ) {
+module.exports = function ( ) {
 
  	var QueryChainer = function ( ) {
  		this.total = 0;
