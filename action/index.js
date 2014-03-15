@@ -5,6 +5,7 @@ var localstrategy = LocalStrategy.name;
 
 var Privacy = require ( "./privacy" );
 var Status = require ( "./status" );
+var Todo = require ( "./todo" );
 // var tag = require ( "./tag" );
 var User = require ( "./user" );
 var OAuth1 = require ( "./oauth1" );
@@ -29,6 +30,7 @@ module.exports = function ( models, auth ) {
 	self.privacy = new Privacy ( self.models, self.auth );
 	self.status = new Status ( self.models, self.auth );
 	// self.tag = new tag ( self.models, self.auth );
+	self.todo = new Todo ( self.models, self.auth );
 	self.user = new User ( self.models, self.auth );
 	self.oauth1 = new OAuth1 ( self.models, self.auth );
 
