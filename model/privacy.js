@@ -26,7 +26,13 @@ module.exports = function ( waterline, adapter, conf ) {
 				in: conf.privacies
 			},
 			// associations
-			todos: { collection: "todos", via: "privacy" }
+			todos: { collection: "todos", via: "privacy" },
+
+			// instance methods
+			toJSON: function ( ) {
+				return { id: this.id, name: this.name };
+			}
+			
 		}
 	} );
 

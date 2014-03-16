@@ -21,6 +21,8 @@ module.exports = function ( nodoovent, url ) {
 				for ( var i = 0; i < lprivacies; i++ ) {
 					res.body[i].should.have.property ( "id", i + 1 );
 					res.body[i].should.have.property ( "name", privacies[i] );
+					res.body[i].should.not.have.property ( "createdAt" );
+					res.body[i].should.not.have.property ( "updatedAt" );
 				}
 				callback ( );
 			} );
@@ -37,6 +39,8 @@ module.exports = function ( nodoovent, url ) {
 					res.should.be.json;
 					res.body.should.have.property ( "id", i + 1 );
 					res.body.should.have.property ( "name", privacies[i] );
+					res.body.should.not.have.property ( "createdAt" );
+					res.body.should.not.have.property ( "updatedAt" );
 					callback ( );
 				} );
 			} );

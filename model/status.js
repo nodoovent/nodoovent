@@ -28,7 +28,13 @@ module.exports = function ( waterline, adapter, conf ) {
 				in: conf.status
 			},
 			// associations
-			todos: { collections: "todos", via: "status" }
+			todos: { collections: "todos", via: "status" },
+
+			// instance methods
+			toJSON: function ( ) {
+				return { id: this.id, name: this.name };
+			}
+			
 		}
 	} );
 
