@@ -3,7 +3,7 @@ var should = require ( "should" );
 var Utils = require ( "../utils/" );
 var DateHelper = Utils.DateHelper;
 
-describe ( "Test DateHelper utils functions", function ( ) {
+describe ( "[Test DateHelper utils functions]", function ( ) {
 
 	var year = 2014;
 	var month = 2;
