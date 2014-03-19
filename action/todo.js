@@ -18,20 +18,23 @@ module.exports = function ( models, auth ) {
 		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
 			var dueAt = req.param ( "dueAt" );
-			var dueDate = DateHelper.string2date ( dueAt );
-			if ( dueDate === "" ) dueDate = null;
+			if ( dueAt === "" ) dueAt = null;
+			var privacy = req.param ( "privacy" );
 			var todo = {
 				name: req.param ( "name" ),
 				description: req.param ( "description" ),
-				dueAt: dueDate,
+				dueAt: dueAt,
 				author: req.user.id,
-				privacy: req.param ( "privacy" ) ? req.param ( "privacy" ) : 2, // add conf.privacies Private id ???
+				privacy: ( privacy || privacy == 1 || privacy == 2 ) ? privacy : 2,
 				status: 1 // add conf.status Created id ???
 			};
 			// create the todo
 			Todos.create ( todo, function ( err, todo ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
-				res.status ( 201 ).send ( todo );
+				Todos.findOne ( todo.id ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
+					if ( err ) return res.send ( { result: "error", error: err } );
+					res.status ( 201 ).send ( todo );
+				} );
 			} );
 		}
 	];
