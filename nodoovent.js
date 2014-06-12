@@ -5,6 +5,11 @@
 var path = require ( "path" );
 
 var express = require ( "express" );
+var bodyParser = require ( "body-parser" );
+var favicon = require ( "serve-favicon" );
+var methodOverride = require ( "method-override" );
+var session = require ( "express-session" );
+var cookieParser = require ( "cookie-parser" );
 var passport = require ( "passport" );
 
 var conf = require ( "./conf" );
@@ -26,25 +31,37 @@ module.exports = function ( callback ) {
 	app.set ( "port", process.env.PORT || 3000 );
 	app.set ( "views", __dirname + "/views" );
 	app.set ( "view engine", "ejs" );
-	app.use ( express.favicon ( ) );
-	app.use ( express.bodyParser ( ) );
-	if  ( "development" == app.get ( "env" ) ) { app.use ( express.logger ( "dev" ) ); }
-	app.use ( express.methodOverride ( ) );
-	app.use ( express.cookieParser ( "your secret here" ) );
-	app.use ( express.session ( { secret: 'nodoovent ninja dev' } ) );
+	app.use ( favicon ( path.join ( __dirname, "public", "favicon.png" ) ) );
+	app.use ( bodyParser ( ) );
+
+	// development and test only
+	var errorhandler = null;
+	var morgan = null;
+	if  ( "development" === app.get ( "env" ) || "test" === app.get ( "env" ) ) {
+		errorhandler = require ( "errorhandler" );
+		morgan = require ( "morgan" );
+	}
+
+	// development only
+	if  ( "development" === app.get ( "env" ) ) {
+		app.use ( morgan ( "dev" ) );
+	}
+
+	app.use ( methodOverride ( ) );
+	app.use ( cookieParser ( "your secret here" ) );
+	app.use ( session ( { secret: 'nodoovent ninja dev' } ) );
 	app.use ( passport.initialize ( ) );
 	app.use ( passport.session ( ) );
-	app.use ( app.router );
 	app.use ( express.static ( path.join ( __dirname, "public" ) ) );
 
 	// development only
-	if  ( "development" == app.get ( "env" ) ) {
-		app.use ( express.errorHandler ( ) );
+	if  ( "development" === app.get ( "env" ) ) {
+		app.use ( errorhandler ( ) );
 	}
 
 	// test only
-	if ( "test" == app.get ( "env" ) ) {
-		app.use ( express.errorHandler ( ) );
+	if ( "test" === app.get ( "env" ) ) {
+		app.use ( errorhandler ( ) );
 	}
 
 	// load conf
