@@ -15,22 +15,32 @@ module.exports = function ( nodoovent, url ) {
 	var testPrivacyTodo = function ( data, privacy ) {
 		data.should.have.property ( "privacy" );
 		data.privacy.should.have.property ( "id" );
-		data.privacy.should.have.property ( "name", privacy );
+		if ( arguments.length > 1 ) data.privacy.should.have.property ( "name", privacy );
+		else data.privacy.should.have.property ( "name" );
 	}
 
 	var testStatusTodo = function ( data, status ) {
 		data.should.have.property ( "status" );
 		data.status.should.have.property ( "id" );
-		data.status.should.have.property ( "name", status );
+		if ( arguments.length > 1 ) data.status.should.have.property ( "name", status );
+		else data.status.should.have.property ( "name" );
 	}
 
 	var testAuthorTodo = function ( data, author ) {
 		data.should.have.property ( "author" );
-		data.author.should.have.property ( "id", author.id );
-		data.author.should.have.property ( "login", author.login );
-		data.author.should.have.property ( "firstName", author.firstName );
-		data.author.should.have.property ( "lastName", author.lastName );
-		data.author.should.have.property ( "email", author.email );
+		if ( arguments.length > 1 ) {
+			data.author.should.have.property ( "id", author.id );
+			data.author.should.have.property ( "login", author.login );
+			data.author.should.have.property ( "firstName", author.firstName );
+			data.author.should.have.property ( "lastName", author.lastName );
+			data.author.should.have.property ( "email", author.email );
+		} else {
+			data.author.should.have.property ( "id" );
+			data.author.should.have.property ( "login" );
+			data.author.should.have.property ( "firstName" );
+			data.author.should.have.property ( "lastName" );
+			data.author.should.have.property ( "email" );
+		}
 	}
 
 	describe ( "Test /todos and /users/id/todos end points:", function ( ) {
@@ -245,11 +255,61 @@ module.exports = function ( nodoovent, url ) {
 			var oauth = null;
 			var accesstoken = "";
 			var accesssecret = "";
+			var alltodos = null;
+			var cpttodos = 0;
 
-			before ( function ( ) {
+			before ( function ( callback ) {
+				// prepare oauth client
 				oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
 				accesstoken = oauth1accesstoken.token;
 				accesssecret = oauth1accesstoken.secret;
+
+				// create new user to populate todos with him
+				var user = { firstName: "James", lastName: "Hook", login: "captainhook", email: "captain.hook@jollyroger.com", password: "tictac" };
+				var models = nodoovent.models;
+				models.users.create ( user, function ( err, user ) {
+					if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+					var todos = [
+						{ name: "Catch Peter Pan", description: null, dueAt: null, status: 1, privacy: 1, author: user.id },
+						{ name: "Escape to the crocodile", description: null, dueAt: null, status: 1, privacy: 2, author: user.id }
+					];
+					models.todos.create ( todos, function ( err, todos ) {
+						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+						// get all todos and count todos user peter pan can see ...
+						models.todos.find ( ).exec ( function ( err, todos ) {
+							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+							alltodos = todos;
+							for ( var i in todos ) {
+								if ( todos[i].author == peterpan.id ) cpttodos++;
+								else if ( todos[i].privacy == 2 ) cpttodos++;
+							}
+							callback ( );
+						} );
+					} );
+				} );			
+			} );
+
+			it ( "should have todos list", function ( callback ) {
+				oauth.get ( url + "/todos", accesstoken, accesssecret, function ( err, data, res ) {
+					if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+					res.should.have.status ( 200 );
+					res.should.be.json;
+					data = JSON.parse ( data );
+					data.should.be.an.Array
+					data.length.should.be.equal ( cpttodos );
+					for ( var i in data ) {
+						data[i].should.have.property ( "name" );
+						data[i].should.have.property ( "description" );
+						data[i].should.have.property ( "dueAt" );
+						data[i].should.have.property ( "createdAt" );
+						data[i].should.have.property ( "updatedAt" );
+						testPrivacyTodo ( data[i] );
+						testStatusTodo ( data[i] );
+						testAuthorTodo ( data[i] );
+						if ( data[i].author.id != peterpan.id ) data[i].privacy.id.should.be.equal ( 1 );
+					}
+					callback ( );
+				} )
 			} );
 
 		} );

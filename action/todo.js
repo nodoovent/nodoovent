@@ -108,7 +108,8 @@ module.exports = function ( models, auth ) {
 	self.list = [
 		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
-			Todos.find ( ).where ( { privacy: 1 } ).where ( { privacy: 2, author: req.user.id } ).exec ( function ( err, todos ) {
+			Todos.find ( ).where ( { or: [ { privacy: 1 }, { author: req.user.id } ] } ).populate ( "privacy" )
+			.populate ( "status" ).populate ( "author" ).exec ( function ( err, todos ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				res.send ( todos );
 			} );
