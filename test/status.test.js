@@ -1,4 +1,5 @@
 var should = require ( "should" );
+var shouldHTTP = require ( "should-http" );
 var supertest = require ( "supertest" );
 
 /*

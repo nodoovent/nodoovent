@@ -53,7 +53,8 @@
     "mocha": "*",
     "morgan": "^1.1.1",
     "oauth": "~0.9.10",
-    "should": "~2.0.2",
+    "should": "^4.0.4",
+    "should-http": "0.0.2",
     "supertest": "~0.8.1"
   }
 }
