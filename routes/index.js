@@ -11,7 +11,7 @@ var OAuth1 = require ( "./oauth1" );
 module.exports = function ( models, auth, action ) {
 	var self = this;
 
-	self.modes = models;
+	self.models = models;
 	self.auth = auth;
 	self.action = action;
 
