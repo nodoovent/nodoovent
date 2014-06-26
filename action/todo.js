@@ -13,6 +13,7 @@ module.exports = function ( models, auth ) {
 	self.auth = auth;
 
 	var Todos = models.todos;
+	var Users = models.users;
 
 	self.create = [	// add a todo to the authenticate user
 		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
@@ -42,13 +43,19 @@ module.exports = function ( models, auth ) {
 	self.userList = [
 		passport.authenticate ( oauth1TokenStrategy, { session: false } ),
 		function ( req, res ) {
+			// get user
 			var userid = req.param ( "userid" );
-			var where = { author: userid };
-			if ( userid != req.user.id )
-				where.privacy = 1; // add conf.privacies Public id ???
-			Todos.find ( ).where ( where ).exec ( function ( err, todos ) {
-				if ( err ) return res.send ( { result: "error", error: err } );
-				res.send ( todos );
+			Users.findOne ( userid ).exec ( function ( err, user ) {
+				if ( err ) return res.status ( 500 ).send ( { result: "error", error: err } );
+				if ( !user ) return res.status ( 404 ).send ( );
+				// get todos list
+				var where = { author: userid };
+				if ( userid != req.user.id )
+					where.privacy = 1; // add conf.privacies Public id ???
+				Todos.find ( ).where ( where ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todos ) {
+					if ( err ) return res.send ( { result: "error", error: err } );
+					res.send ( todos );
+				} );
 			} );
 		}
 	];
