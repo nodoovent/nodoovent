@@ -550,6 +550,60 @@ module.exports = function ( nodoovent, url ) {
 
 		} );
 
+		describe ( "/todos/:id", function ( ) {
+
+			var todoId = null;
+
+			before ( function ( callback ) {
+				nodoovent.models.todos.find ( ).limit ( 1 ).exec ( function ( err, todo ) {
+					if ( err ) return callback ( new Error ( err ) );
+					todoId = todo.id;
+					callback ( );
+				} );
+			} );
+
+			describe ( "request /todos/:id endpoint without oauth1 authentication", function ( ) {
+
+				it ( "POST /user/:id/todos return 404", function ( callback ) {
+					var req = supertest ( url ).post ( "/todos/" + todoId );
+					req.end ( function ( err, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 404 );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET /todos/:id return 401", function ( callback ) {
+					var req = supertest ( url ).get ( "/todos/" + todoId );
+					req.end ( function ( err, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 401 );
+						callback ( );
+					} );
+				} );
+
+				it ( "PUT /todos/:id return 401", function ( callback ) {
+					var req = supertest ( url ).put ( "/todos/" +todoId );
+					req.end ( function ( err, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 401 );
+						callback ( );
+					} );
+				} );
+
+				it ( "DELETE /todos/:id return 401", function ( callback ) {
+					var req = supertest ( url ).del ( "/todos/" + todoId);
+					req.end ( function ( err, res ) {
+						if ( err ) return callback ( err );
+						res.should.have.status ( 401 );
+						callback ( );
+					} );
+				} );
+
+			} );
+
+		} );
+
 	} );
 	
 }
