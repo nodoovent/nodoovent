@@ -356,7 +356,7 @@ module.exports = function ( nodoovent, url ) {
 
 		describe ( "/user/:id/todos", function ( ) {
 
-			describe ( "request /user/:id/todos endpoint without oauth1 authentication", function ( ) {
+			describe ( "Request /user/:id/todos endpoint without oauth1 authentication", function ( ) {
 
 				it ( "POST /user/:id/todos return 404", function ( callback ) {
 					var req = supertest ( url ).post ( "/user/" + peterpan.id + "/todos" );
@@ -408,21 +408,21 @@ module.exports = function ( nodoovent, url ) {
 					accesssecret = oauth1accesstoken.secret;
 				} );
 
-				it ( "DELETE /todos return 404", function ( callback ) {
+				it ( "DELETE /user/:id/todos return 404", function ( callback ) {
 					oauth.delete ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, function ( err, data, res ) {
 						res.should.have.status ( 404 );
 						callback ( );
 					} );
 				} );
 
-				it ( "PUT /todos return 404", function ( callback ) {
+				it ( "PUT /user/:id/todos return 404", function ( callback ) {
 					oauth.put ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, null, null, function ( err, data, res ) {
 						res.should.have.status ( 404 );
 						callback ( );
 					} );
 				} );
 
-				it ( "POST /todos return 404", function ( callback ) {
+				it ( "POST /user/:id/todos return 404", function ( callback ) {
 					oauth.post ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, null, null, function ( err, data, res ) {
 						res.should.have.status ( 404 );
 						callback ( );
@@ -562,7 +562,7 @@ module.exports = function ( nodoovent, url ) {
 				} );
 			} );
 
-			describe ( "request /todos/:id endpoint without oauth1 authentication", function ( ) {
+			describe ( "Request /todos/:id endpoint without oauth1 authentication", function ( ) {
 
 				it ( "POST /user/:id/todos return 404", function ( callback ) {
 					var req = supertest ( url ).post ( "/todos/" + todoId );
