@@ -277,16 +277,16 @@ module.exports = function ( nodoovent, url ) {
 					var user = { firstName: "James", lastName: "Hook", login: "captainhook", email: "captain.hook@jollyroger.com", password: "tictac" };
 					var models = nodoovent.models;
 					models.users.create ( user, function ( err, user ) {
-						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+						if ( err ) return callback ( new Error ( err ) );
 						var todos = [
 							{ name: "Catch Peter Pan", description: null, dueAt: null, status: 1, privacy: 1, author: user.id },
 							{ name: "Escape to the crocodile", description: null, dueAt: null, status: 1, privacy: 2, author: user.id }
 						];
 						models.todos.create ( todos, function ( err, todos ) {
-							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+							if ( err ) return callback ( new Error ( err ) );
 							// get all todos and count todos user peter pan can see ...
 							models.todos.find ( ).exec ( function ( err, todos ) {
-								if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+								if ( err ) return callback ( new Error ( err ) );
 								alltodos = todos;
 								for ( var i in todos ) {
 									if ( todos[i].author == peterpan.id ) cpttodos++;
@@ -367,7 +367,7 @@ module.exports = function ( nodoovent, url ) {
 					} );
 				} );
 
-				it ( "GET /todos return 401", function ( callback ) {
+				it ( "GET /user/:id/todos return 401", function ( callback ) {
 					var req = supertest ( url ).get ( "/user/" + peterpan.id + "/todos" );
 					req.end ( function ( err, res ) {
 						if ( err ) return callback ( err );
@@ -376,7 +376,7 @@ module.exports = function ( nodoovent, url ) {
 					} );
 				} );
 
-				it ( "PUT /todos return 404", function ( callback ) {
+				it ( "PUT /user/:id/todos return 404", function ( callback ) {
 					var req = supertest ( url ).put ( "/user/" + peterpan.id + "/todos" );
 					req.end ( function ( err, res ) {
 						if ( err ) return callback ( err );
@@ -385,7 +385,7 @@ module.exports = function ( nodoovent, url ) {
 					} );
 				} );
 
-				it ( "DELETE /todos return 404", function ( callback ) {
+				it ( "DELETE /user/:id/todos return 404", function ( callback ) {
 					var req = supertest ( url ).del ( "/user/" + peterpan.id + "/todos" );
 					req.end ( function ( err, res ) {
 						if ( err ) return callback ( err );
@@ -452,7 +452,7 @@ module.exports = function ( nodoovent, url ) {
 					var user = { firstName: "Tinker", lastName: "Bell", login: "tinkerbell", email: "tinkerbell@neverland.com", password: "fairy" };
 					var models = nodoovent.models;
 					models.users.create ( user, function ( err, user ) {
-						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+						if ( err ) return callback ( new Error ( err ) );
 						tinkerbell = user;
 						var todos = [
 							{ name: "cook fairy powder", description: null, dueAt: null, status: 1, privacy: 1, author: user.id },
@@ -461,23 +461,23 @@ module.exports = function ( nodoovent, url ) {
 						];
 
 						models.todos.create ( todos, function ( err, todos ) {
-							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+							if ( err ) return callback ( new Error ( err ) );
 
 							// get Public todos for tinkerbell and todos for peterpan
 							var chainer = new QueryChainer ( );
 
 							chainer.add ( models.todos, "find", function ( err, todos ) {
-								if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+								if ( err ) return callback ( new Error ( err ) );
 								tinkerbellPublicTodos = todos;
 							}, { author: tinkerbell.id, privacy: 1 } );
 
 							chainer.add ( models.todos, "find", function ( err, todos ) {
-								if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+								if ( err ) return callback ( new Error ( err ) );
 								peterpanTodos = todos;
 							}, { author: peterpan.id } );
 
 							chainer.add ( models.users, "find", function ( err, users ) {
-								if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
+								if ( err ) return callback ( new Error ( err ) );
 								for ( var i in users ) {
 									if ( users[i].id == nobodyId )
 										nobodyId = users[i].id + 1;
@@ -539,7 +539,7 @@ module.exports = function ( nodoovent, url ) {
 					} );
 				} );
 
-				it ( "with not existed user id", function ( callback ) {
+				it ( "with not existed user id get 404 HTTP status", function ( callback ) {
 					oauth.get ( url + "/user/" + nobodyId + "/todos", accesstoken, accesssecret, function ( err, data, res ) {
 						res.should.have.status ( 404 );
 						callback ( );
