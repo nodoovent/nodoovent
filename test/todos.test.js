@@ -602,6 +602,27 @@ module.exports = function ( nodoovent, url ) {
 
 			} );
 
+			describe ( "POST /todos/:id with oauth1 authentication", function ( ) {
+
+				var oauth = null;
+				var accesstoken = "";
+				var accesssecret = "";
+
+				before ( function ( ) {
+					oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+					accesstoken = oauth1accesstoken.token;
+					accesssecret = oauth1accesstoken.secret;
+				} );
+
+				it ( "POST /todos/:id return 404", function ( callback ) {
+					oauth.post ( url + "/todos/" + todoId, accesstoken, accesssecret, null, null, function ( err, data, res ) {
+						res.should.have.status ( 404 );
+						callback ( );
+					} );
+				} );
+
+			} );
+
 		} );
 
 	} );
