@@ -3,13 +3,15 @@ var passport = require ( "passport" );
 var LocalStrategy = require ( "../auth/localstrategy" );
 var localstrategy = LocalStrategy.name;
 
+var OAuth1TokenStrategy = require ( "../auth/oauth1tokenstrategy" );
+var oauth1TokenStrategy = OAuth1TokenStrategy.name;
+
 var Privacy = require ( "./privacy" );
 var Status = require ( "./status" );
 var Todo = require ( "./todo" );
 // var tag = require ( "./tag" );
 var User = require ( "./user" );
 var OAuth1 = require ( "./oauth1" );
-
 
 module.exports = function ( models, auth ) {
 	var self = this;
@@ -23,6 +25,13 @@ module.exports = function ( models, auth ) {
 
 	self.loginForm = function ( req, res ) {
 		res.render ( "login", { title: "Nodoovent" } );
+	}
+
+	// "system" actions ...
+	self.checkAuth = [ passport.authenticate ( oauth1TokenStrategy, { session: false } ) ];
+	
+	self.methodNotAllowed = function ( req, res ) {
+		return res.status ( 405 ).send ( );
 	}
 
 	self.login = passport.authenticate ( localstrategy,  { successReturnToOrRedirect: '/', failureRedirect: '/login' } );

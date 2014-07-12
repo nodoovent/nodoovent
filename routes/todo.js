@@ -9,19 +9,19 @@ module.exports = function ( model, auth, action ) {
 
 		// search todos for one user
 		"/user/:userid/todos": {
-			"GET": self.action.todo.userList
+			"GET": { action: self.action.todo.userList, isAuthenticated: true }
 		},
 
 		"/todos": {
-			"POST": self.action.todo.create,	// add a todo for the authenticate user
-			"GET": self.action.todo.list 		// search in all todos
+			"POST": { action: self.action.todo.create, isAuthenticated: true },	// add a todo for the authenticate user
+			"GET": { action: self.action.todo.list, isAuthenticated: true } 		// search in all todos
 		},
 
 		// use to manipulate todos (if authenticate user if is authorized)
 		"/todos/:id": {
-			"GET": self.action.todo.getById,
-			"DELETE": self.action.todo.delete,
-			"PUT": self.action.todo.update
+			"GET": { action: self.action.todo.getById, isAuthenticated: true },
+			"DELETE": { action: self.action.todo.delete, isAuthenticated: true },
+			"PUT": { action: self.action.todo.update, isAuthenticated: true },
 		}
 
 	}

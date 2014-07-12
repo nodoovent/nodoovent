@@ -9,20 +9,20 @@ module.exports = function ( models, auth, action ) {
 		
 		// use to manipulate the authenticate user
 		"/user": {
-			"GET": self.action.user.get,
+			"GET": { action: self.action.user.get, isAuthenticated: true },
 			"POST": self.action.user.create,
-			"PUT": self.action.user.update,
-			"DELETE": self.action.user.delete		
+			"PUT": { action: self.action.user.update, isAuthenticated: true },
+			"DELETE": { action: self.action.user.delete, isAuthenticated: true },		
 		},
 
 		// search on all users
 		"/users": {
-			"GET": self.action.user.list
+			"GET": { action: self.action.user.list, isAuthenticated: true },
 		},
 
 		// get one user
 		"/users/:userid": {
-			"GET": self.action.user.getById
+			"GET": { action: self.action.user.getById, isAuthenticated: true },
 		}
 
 	}

@@ -77,7 +77,7 @@ module.exports = function ( callback ) {
 		nodoovent.actions = new actions ( nodoovent.models, nodoovent.auth );
 		nodoovent.routes = new routes ( nodoovent.models, nodoovent.auth, nodoovent.actions );
 
-		routebuilder ( nodoovent.app, nodoovent.routes.routes );
+		routebuilder ( nodoovent );
 
 		callback ( null, nodoovent );
 	} );
