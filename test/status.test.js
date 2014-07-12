@@ -12,6 +12,14 @@ module.exports = function ( nodoovent, url ) {
 
 	describe ( "Test /status end points:", function ( ) {
 
+		var supertest405 = function ( req, callback ) {
+			req.end ( function ( err, res ) {
+				if ( err ) return callback ( err );
+				res.should.have.status ( 405 );
+				callback ( )
+			} );
+		}
+
 		var supertest404 = function ( req, callback ) {
 			req.end ( function ( err, res ) {
 				if ( err ) return callback ( err );
@@ -68,32 +76,32 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "POST /status", function ( callback ) {
 				req = supertest ( url ).post ( "/status" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "POST /status/1", function ( callback ) {
 				req = supertest ( url ).post ( "/status/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /status", function ( callback ) {
 				req = supertest ( url ).put ( "/status" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /status/1", function ( callback ) {
 				req = supertest ( url ).put ( "/status/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /status", function ( callback ) {
 				req = supertest ( url ).del ( "/status" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /status/1", function ( callback ) {
 				req = supertest ( url ).del ( "/status/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 		} );

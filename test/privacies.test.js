@@ -12,6 +12,14 @@ module.exports = function ( nodoovent, url ) {
 
 	describe ( "Test /privacies end points:", function ( ) {
 
+		var supertest405 = function ( req, callback ) {
+			req.end ( function ( err, res ) {
+				if ( err ) return callback ( err );
+				res.should.have.status ( 405 );
+				callback ( )
+			} );
+		}
+
 		var supertest404 = function ( req, callback ) {
 			req.end ( function ( err, res ) {
 				if ( err ) return callback ( err );
@@ -74,32 +82,32 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "POST /privacies", function ( callback ) {
 				req = supertest ( url ).post ( "/privacies" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "POST /privacies/1", function ( callback ) {
 				req = supertest ( url ).post ( "/privacies/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /privacies", function ( callback ) {
 				req = supertest ( url ).put ( "/privacies" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /privacies/1", function ( callback ) {
 				req = supertest ( url ).put ( "/privacies/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /privacies", function ( callback ) {
 				req = supertest ( url ).del ( "/privacies" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /privacies/1", function ( callback ) {
 				req = supertest ( url ).del ( "/privacies/1" );
-				supertest404 ( req, callback );
+				supertest405 ( req, callback );
 			} );
 
 		} );
