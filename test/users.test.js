@@ -174,11 +174,65 @@ module.exports = function ( nodoovent, url ) {
 				} );
 			} );
 
+			it ( "should have POST /users return 405 http code", function ( callback ) {
+				var req = supertest ( url ).post ( "/users" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have PUT /users return 405 http code", function ( callback ) {
+				var req = supertest ( url ).put ( "/users" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have DELETE /users return 405 http code", function ( callback ) {
+				var req = supertest ( url ).del ( "/users" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
+					callback ( );
+				} );
+			} );
+
 			it ( "should have GET /users/1 return 401 http code", function ( callback ) {
 				var req = supertest ( url ).get ( "/users/1" ).send ( );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 401 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have POST /users/1 return 405 http code", function ( callback ) {
+				var req = supertest ( url ).post ( "/users/1" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have PUT /users/1 return 405 http code", function ( callback ) {
+				var req = supertest ( url ).put ( "/users/1" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
+					callback ( );
+				} );
+			} );
+
+			it ( "should have DELETE /users/1 return 405 http code", function ( callback ) {
+				var req = supertest ( url ).del ( "/users/1" ).send ( );
+				req.end ( function ( err, res ) {
+					if ( err ) return callback ( err );
+					res.should.have.status ( 405 );
 					callback ( );
 				} );
 			} );
@@ -538,7 +592,7 @@ module.exports = function ( nodoovent, url ) {
 
 			} );
 
-			describe ( "GET /users with an oauth1 authentication", function ( ) {
+			describe ( "GET /users and /users/:id with an oauth1 authentication", function ( ) {
 
 				it ( "should have a GET /users endpoint and have a http status", function ( callback ) {
 					oauth.get ( url + "/users", accesstoken, accesssecret, function ( err, data, res ) {
@@ -585,6 +639,52 @@ module.exports = function ( nodoovent, url ) {
 					oauth.get ( url + "/users/" + ( usercount + 1 ), accesstoken, accesssecret, function ( err, data, res ) {
 						err.statusCode.should.equal ( 404 );
 						res.should.have.status ( 404 );
+						callback ( );
+					} );
+				} );
+
+			} );
+
+			describe ( "POST, PUT and DELETE /users and /users/:id with oauth1 authentication", function ( ) {
+
+				it ( "POST /users end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.post ( url + "/users", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+						res.should.have.status ( 405 );
+						callback ( );
+					} );
+				} );
+
+				it ( "PUT /users end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.put ( url + "/users", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+						res.should.have.status ( 405 );
+						callback ( );
+					} );
+				} );
+
+				it ( "DELETE /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.delete ( url + "/users/1", accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 405 );
+						callback ( );
+					} );
+				} );
+
+				it ( "POST /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.post ( url + "/users/1", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+						res.should.have.status ( 405 );
+						callback ( );
+					} );
+				} );
+
+				it ( "PUT /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.put ( url + "/users/1", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+						res.should.have.status ( 405 );
+						callback ( );
+					} );
+				} );
+
+				it ( "DELETE /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
+					oauth.delete ( url + "/users/1", accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 405 );
 						callback ( );
 					} );
 				} );
