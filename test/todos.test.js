@@ -586,17 +586,17 @@ module.exports = function ( nodoovent, url ) {
 
 		describe ( "/todos/:id", function ( ) {
 
-			var todoId = null;
-
-			before ( function ( callback ) {
-				nodoovent.models.todos.find ( ).limit ( 1 ).exec ( function ( err, todo ) {
-					if ( err ) return callback ( new Error ( err ) );
-					todoId = todo.id;
-					callback ( );
-				} );
-			} );
-
 			describe ( "Request /todos/:id endpoint without oauth1 authentication", function ( ) {
+
+				var todoId = null;
+
+				before ( function ( callback ) {
+					nodoovent.models.todos.find ( ).limit ( 1 ).exec ( function ( err, todo ) {
+						if ( err ) return callback ( new Error ( err ) );
+						todoId = todo.id;
+						callback ( );
+					} );
+				} );
 
 				it ( "POST /user/:id/todos return 405", function ( callback ) {
 					var req = supertest ( url ).post ( "/todos/" + todoId );
@@ -641,11 +641,18 @@ module.exports = function ( nodoovent, url ) {
 				var oauth = null;
 				var accesstoken = "";
 				var accesssecret = "";
+				var todoId = null;
 
-				before ( function ( ) {
+				before ( function ( callback ) {
 					oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
 					accesstoken = oauth1accesstoken.token;
 					accesssecret = oauth1accesstoken.secret;
+
+					nodoovent.models.todos.find ( ).limit ( 1 ).exec ( function ( err, todo ) {
+						if ( err ) return callback ( new Error ( err ) );
+						todoId = todo.id;
+						callback ( );
+					} );
 				} );
 
 				it ( "POST /todos/:id return 405", function ( callback ) {
