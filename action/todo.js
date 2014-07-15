@@ -50,10 +50,10 @@ module.exports = function ( models, auth ) {
 	};
 
 	self.getById = function ( req, res ) {
-		Todos.findOne ( req.param ( "id" ) ).exec ( function ( err, todo ) {
+		Todos.findOne ( req.param ( "id" ) ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
 			if ( !todo ) return res.status ( 404 ).send ( );
-			if ( todo.privacy == 2 && todo.author != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+			if ( todo.privacy.id == 2 && todo.author.id != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
 			res.send ( todo );
 		} );
 	};

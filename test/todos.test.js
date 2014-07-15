@@ -664,6 +664,142 @@ module.exports = function ( nodoovent, url ) {
 
 			} );
 
+			describe ( "GET /todos/:id with oauth1 authentication", function ( ) {
+
+				var oauth = null;
+				var accesstoken = "";
+				var accesssecret = "";
+
+				var unusedTodosId = 1;
+				var otherTodosIdPrivate = null;
+				var ownTodosPublic = null;
+				var ownTodosPrivate = null;
+				var otherTodosPublic = null;
+
+				before (function ( callback ) {
+					oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+					accesstoken = oauth1accesstoken.token;
+					accesssecret = oauth1accesstoken.secret;
+
+					var chainer = new QueryChainer ( );
+					var models = nodoovent.models;
+
+					// get unused todos id
+					chainer.add ( models.todos, "find", function ( err, todos ) {
+						if ( err ) return callback ( new Error ( err ) );
+						for ( var i in todos ) {
+							if ( todos[i].id == unusedTodosId )
+								unusedTodosId = todos[i].id + 1;
+						}
+					} );
+
+					// get own public todo
+					chainer.add ( models.todos, "find", function ( err, todos ) {
+						if ( err ) return callback ( new Error ( err ) );
+						if ( todos.length == 0 ) return callback ( new Error ( "No public todos for authenticated user" ) );
+						ownTodosPublic = todos[0];
+					}, { author: peterpan.id, privacy: 1 } );
+
+					// get own private todo
+					chainer.add ( models.todos, "find", function ( err, todos ) {
+						if ( err ) return callback ( new Error ( err ) );
+						if ( todos.length == 0 ) return callback ( new Error ( "No public todos for authenticated user" ) );
+						ownTodosPrivate = todos[0];
+					}, { author: peterpan.id, privacy: 2 } );
+
+					// get other public todo
+					chainer.add ( models.todos, "find", function ( err, todos ) {
+						if ( err ) return callback ( new Error ( err ) );
+						if ( todos.length == 0 ) return callback ( new Error ( "No public todos for authenticated user" ) );
+						otherTodosPublic = todos[0];
+					}, { author: { "!": peterpan.id }, privacy: 1 } );
+
+					// get other private todo
+					chainer.add ( models.todos, "find", function ( err, todos ) {
+						if ( err ) return callback ( new Error ( err ) );
+						if ( todos.length == 0 ) return callback ( new Error ( "No public todos for authenticated user" ) );
+						otherTodosIdPrivate = todos[0].id;
+					}, { author: { "!": peterpan.id }, privacy: 2 } );
+
+					chainer.run ( function ( errors ) {
+						if ( errors ) return callback ( new Error ( errors ) );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET unused todo id should return 404 http code", function ( callback ) {
+					oauth.get ( url + "/todos/" + unusedTodosId, accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 404 );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET private todo from an user that not the authenticated user should return a 403 http code", function ( callback ) {
+					oauth.get ( url + "/todos/" + otherTodosIdPrivate, accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 403 );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET public todo from authenticated user", function ( callback ) {
+					oauth.get ( url + "/todos/" + ownTodosPublic.id, accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 200 );
+						res.should.be.json;
+						data = JSON.parse ( data );
+						data.should.be.an.Object;
+						data.should.have.property ( "id", ownTodosPublic.id );
+						data.should.have.property ( "name", ownTodosPublic.name );
+						data.should.have.property ( "description", ownTodosPublic.description );
+						data.should.have.property ( "dueAt", DateHelper.date2string ( ownTodosPublic.dueAt ) );
+						data.should.have.property ( "createdAt", DateHelper.date2string ( ownTodosPublic.createdAt ) );
+						data.should.have.property ( "updatedAt", DateHelper.date2string ( ownTodosPublic.updatedAt ) );
+						testPrivacyTodo ( data, { id: 1, name: "Public" } );
+						testStatusTodo ( data, { id: ownTodosPublic.status } );
+						testAuthorTodo ( data, peterpan );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET private todo from authenticated user", function ( callback ) {
+					oauth.get ( url + "/todos/" + ownTodosPrivate.id, accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 200 );
+						res.should.be.json;
+						data = JSON.parse ( data );
+						data.should.be.an.Object;
+						data.should.have.property ( "id", ownTodosPrivate.id );
+						data.should.have.property ( "name", ownTodosPrivate.name );
+						data.should.have.property ( "description", ownTodosPrivate.description );
+						data.should.have.property ( "dueAt", DateHelper.date2string ( ownTodosPrivate.dueAt ) );
+						data.should.have.property ( "createdAt", DateHelper.date2string ( ownTodosPrivate.createdAt ) );
+						data.should.have.property ( "updatedAt", DateHelper.date2string ( ownTodosPrivate.updatedAt ) );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { id: ownTodosPrivate.status } );
+						testAuthorTodo ( data, peterpan );
+						callback ( );
+					} );
+				} );
+
+				it ( "GET public todo from an user that not the authenticated user", function ( callback ) {
+					oauth.get ( url + "/todos/" + otherTodosPublic.id, accesstoken, accesssecret, function ( err, data, res ) {
+						res.should.have.status ( 200 );
+						res.should.be.json;
+						data = JSON.parse ( data );
+						data.should.be.an.Object;
+						data.should.have.property ( "id", otherTodosPublic.id );
+						data.should.have.property ( "name", otherTodosPublic.name );
+						data.should.have.property ( "description", otherTodosPublic.description );
+						data.should.have.property ( "dueAt", DateHelper.date2string ( otherTodosPublic.dueAt ) );
+						data.should.have.property ( "createdAt", DateHelper.date2string ( otherTodosPublic.createdAt ) );
+						data.should.have.property ( "updatedAt", DateHelper.date2string ( otherTodosPublic.updatedAt ) );
+						testPrivacyTodo ( data, { id: 1, name: "Public" } );
+						testStatusTodo ( data, { id: otherTodosPublic.status } );
+						testAuthorTodo ( data, { id: otherTodosPublic.author } );
+						callback ( );
+					} );
+				} );
+
+			} );
+
 		} );
 
 	} );
