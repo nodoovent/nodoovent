@@ -15,6 +15,7 @@ module.exports = ( function ( ) {
 	}
 
 	var nodooventDate2String = function ( date ) {
+		if ( typeof date == "undefined" || date == null ) return null;
 		return date.getUTCFullYear ( ) + '-' + pad ( date.getUTCMonth ( ) + 1 ) + '-' + pad ( date.getUTCDate ( ) )
 			+ 'T' + pad ( date.getUTCHours ( ) ) + ':' + pad ( date.getUTCMinutes ( ) ) + ':' + pad ( date.getUTCSeconds ( ) )
 			+ '.' + ( date.getUTCMilliseconds ( ) / 1000 ).toFixed ( 3 ).slice ( 2, 5 ) + 'Z';

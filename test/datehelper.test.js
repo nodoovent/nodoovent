@@ -43,4 +43,9 @@ describe ( "[Test DateHelper utils functions]", function ( ) {
 		res.getTime ( ).should.be.equal ( date.getTime ( ) );
 	} );
 
+	it ( "Test DateHelper.string2date with null date", function ( ) {
+		var res = DateHelper.string2date ( null );
+		should ( res ).not.be.ok; // test null with shouldjs
+	} );
+
 } );
