@@ -13,28 +13,62 @@ var QueryChainer = Utils.QueryChainer;
 
 module.exports = function ( nodoovent, url ) {
 
-	var testPrivacyTodo = function ( data, privacy ) {
+	var testPrivacyTodo = function ( data, info ) {
 		data.should.have.property ( "privacy" );
-		data.privacy.should.have.property ( "id" );
-		if ( arguments.length > 1 ) data.privacy.should.have.property ( "name", privacy );
-		else data.privacy.should.have.property ( "name" );
+		
+		if ( typeof info != "undefined" && info != null ) {
+			if ( typeof info.id != "undefined" && info.id != null )
+				data.privacy.should.have.property ( "id", info.id );
+			else data.privacy.should.have.property ( "id" );
+
+			if ( typeof info.name != "undefined" && info.name != null )
+				data.privacy.should.have.property ( "name", info.name );
+			else data.privacy.should.have.property ( "name" );
+		} else {
+			data.privacy.should.have.property ( "id" );
+			data.privacy.should.have.property ( "name" );
+		}
 	}
 
-	var testStatusTodo = function ( data, status ) {
+	var testStatusTodo = function ( data, info ) {
 		data.should.have.property ( "status" );
-		data.status.should.have.property ( "id" );
-		if ( arguments.length > 1 ) data.status.should.have.property ( "name", status );
-		else data.status.should.have.property ( "name" );
+
+		if ( typeof info != "undefined" && info != null ) {
+			if ( typeof info.id != "undefined" && info.id != null )
+				data.status.should.have.property ( "id", info.id );
+			else data.status.should.have.property ( "id" );
+
+			if ( typeof info.name != "undefined" && info.name != null )
+				data.status.should.have.property ( "name", info.name );
+			else data.status.should.have.property ( "name" );
+		} else {
+			data.status.should.have.property ( "id" );
+			data.status.should.have.property ( "name" );
+		}
 	}
 
 	var testAuthorTodo = function ( data, author ) {
 		data.should.have.property ( "author" );
-		if ( arguments.length > 1 ) {
-			data.author.should.have.property ( "id", author.id );
-			data.author.should.have.property ( "login", author.login );
-			data.author.should.have.property ( "firstName", author.firstName );
-			data.author.should.have.property ( "lastName", author.lastName );
-			data.author.should.have.property ( "email", author.email );
+		if ( typeof author != "undefined" && author != null ) {
+			if ( typeof author.id != "undefined" && author.id != null )
+				data.author.should.have.property ( "id", author.id );
+			else data.author.should.have.property ( "id" );
+
+			if ( typeof author.login != "undefined" && author.login != null )
+				data.author.should.have.property ( "login", author.login );
+			else data.author.should.have.property ( "login" );
+
+			if ( typeof author.firstName != "undefined" && author.firstName != null )
+				data.author.should.have.property ( "firstName", author.firstName );
+			else data.author.should.have.property ( "firstName" );
+
+			if ( typeof author.lastName != "undefined" && author.lastName != null )
+				data.author.should.have.property ( "lastName", author.lastName );
+			else data.author.should.have.property ( "lastName" );
+
+			if ( typeof author.email != "undefined" && author.email != null )
+				data.author.should.have.property ( "email", author.email );
+			else data.author.should.have.property ( "email" );
 		} else {
 			data.author.should.have.property ( "id" );
 			data.author.should.have.property ( "login" );
@@ -133,8 +167,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", todo.dueAt );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Private" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
@@ -155,8 +189,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", todo.dueAt );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Private" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
@@ -175,8 +209,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", null );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Private" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
@@ -195,8 +229,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", null );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Private" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
@@ -215,8 +249,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", null );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Private" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 2, name: "Private" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
@@ -235,8 +269,8 @@ module.exports = function ( nodoovent, url ) {
 						data.should.have.property ( "dueAt", null );
 						data.should.have.property ( "createdAt" );
 						data.should.have.property ( "updatedAt" );
-						testPrivacyTodo ( data, "Public" );
-						testStatusTodo ( data, "Created" );
+						testPrivacyTodo ( data, { id: 1, name: "Public" } );
+						testStatusTodo ( data, { name: "Created" } );
 						testAuthorTodo ( data, peterpan );
 						callback ( );
 					} );
