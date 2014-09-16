@@ -1,6 +1,10 @@
 var should = require ( "should" );
 var shouldHTTP = require ( "should-http" );
-var supertest = require ( "supertest" );
+
+var UtilsTest = require ( "./utils-test" );
+var supertest = UtilsTest.supertest;
+var supertest405 = UtilsTest.supertest405;
+var supertest404 = UtilsTest.supertest404;
 
 /*
  *	Status tests uses current Nodoovent configuration (see conf folder)
@@ -12,25 +16,9 @@ module.exports = function ( nodoovent, url ) {
 
 	describe ( "Test /status end points:", function ( ) {
 
-		var supertest405 = function ( req, callback ) {
-			req.end ( function ( err, res ) {
-				if ( err ) return callback ( err );
-				res.should.have.status ( 405 );
-				callback ( )
-			} );
-		}
-
-		var supertest404 = function ( req, callback ) {
-			req.end ( function ( err, res ) {
-				if ( err ) return callback ( err );
-				res.should.have.status ( 404 );
-				callback ( )
-			} );
-		}
-
 		describe ( "GET end points", function ( ) {
 			it ( "should have GET /status end point", function ( callback ) {
-				var req = supertest ( url ).get ( "/status" ).send ( );
+				var req = supertest ( url, "GET", "/status" ).send ( );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -49,7 +37,7 @@ module.exports = function ( nodoovent, url ) {
 			// test all end points /status/id
 			var TestStatusWithId = function ( i ) {
 				it ( "should have GET /status/" + ( i + 1 ) + " end point (" + status[i] + ")", function ( callback ) {
-					req = supertest ( url ).get ( "/status/" + ( i + 1 )  ).send ( );
+					req = supertest ( url, "GET", "/status/" + ( i + 1 )  ).send ( );
 					req.end ( function ( err, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
@@ -66,7 +54,7 @@ module.exports = function ( nodoovent, url ) {
 			for ( var i = 0; i < lstatus; i++ ) new TestStatusWithId ( i );
 
 			it ( "should not have GET /status/" +  ( lstatus + 1 ) + " end point and should return HTTP 404", function ( callback ) {
-				req = supertest ( url ).get ( "/status/" + ( lstatus + 1 ) ).send ( );
+				req = supertest ( url, "GET", "/status/" + ( lstatus + 1 ) ).send ( );
 				supertest404 ( req, callback );
 			} );
 
@@ -75,32 +63,32 @@ module.exports = function ( nodoovent, url ) {
 		describe ( "POST, PUT and DELETE endpoints", function ( ) {
 
 			it ( "POST /status", function ( callback ) {
-				req = supertest ( url ).post ( "/status" );
+				req = supertest ( url, "POST", "/status" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "POST /status/1", function ( callback ) {
-				req = supertest ( url ).post ( "/status/1" );
+				req = supertest ( url, "POST", "/status/1" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /status", function ( callback ) {
-				req = supertest ( url ).put ( "/status" );
+				req = supertest ( url, "PUT", "/status" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /status/1", function ( callback ) {
-				req = supertest ( url ).put ( "/status/1" );
+				req = supertest ( url, "PUT", "/status/1" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /status", function ( callback ) {
-				req = supertest ( url ).del ( "/status" );
+				req = supertest ( url, "DELETE", "/status" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /status/1", function ( callback ) {
-				req = supertest ( url ).del ( "/status/1" );
+				req = supertest ( url, "DELETE", "/status/1" );
 				supertest405 ( req, callback );
 			} );
 
