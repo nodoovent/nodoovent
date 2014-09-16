@@ -1,6 +1,10 @@
 var should = require ( "should" );
 var shouldHTTP = require ( "should-http" );
-var supertest = require ( "supertest" );
+
+var UtilsTest = require ( "./utils-test" );
+var supertest = UtilsTest.supertest;
+var supertest405 = UtilsTest.supertest405;
+var supertest404 = UtilsTest.supertest404;
 
 /*
  *	Status tests uses current Nodoovent configuration (see conf folder)
@@ -12,26 +16,10 @@ module.exports = function ( nodoovent, url ) {
 
 	describe ( "Test /privacies end points:", function ( ) {
 
-		var supertest405 = function ( req, callback ) {
-			req.end ( function ( err, res ) {
-				if ( err ) return callback ( err );
-				res.should.have.status ( 405 );
-				callback ( )
-			} );
-		}
-
-		var supertest404 = function ( req, callback ) {
-			req.end ( function ( err, res ) {
-				if ( err ) return callback ( err );
-				res.should.have.status ( 404 );
-				callback ( )
-			} );
-		}
-
 		describe ( "GET end points", function ( ) {
 
 			it ( "should have /privacies end point", function ( callback ) {
-				var req = supertest ( url ).get ( "/privacies" ).send ( );
+				var req = supertest ( url, "GET", "/privacies" ).send ( );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -51,7 +39,7 @@ module.exports = function ( nodoovent, url ) {
 			// test all end points /privacies/id
 			var TestPrivaciesWithId = function ( i ) {
 				it ( "should have /privacies/" + ( i + 1 ) + " end point (" + privacies[i] + ")", function ( callback ) {
-					var req = supertest ( url ).get ( "/privacies/" + ( i + 1 ) ).send ( );
+					var req = supertest ( url, "GET", "/privacies/"  + ( i + 1 ) ).send ( );
 					req.end ( function ( err, res ) {
 						if ( err ) return callback ( err );
 						res.should.have.status ( 200 );
@@ -68,12 +56,8 @@ module.exports = function ( nodoovent, url ) {
 			for ( var i = 0; i < lprivacies; i++ ) new TestPrivaciesWithId ( i );
 
 			it ( "should not have /privacies/" + ( lprivacies + 1 ) + " end point and should return 404 http code", function ( callback ) {
-				var req = supertest ( url ).get ( "/privacies/" + ( lprivacies + 1 ) ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err )  return callback ( err );
-					res.should.have.status ( 404 );
-					callback ( );
-				} );
+				var req = supertest ( url, "GET", "/privacies/"  + ( lprivacies + 1 ) ).send ( );
+				supertest404 ( req, callback );
 			} );
 
 		} );
@@ -81,32 +65,32 @@ module.exports = function ( nodoovent, url ) {
 		describe ( "POST, PUT and DELETE endpoints", function ( ) {
 
 			it ( "POST /privacies", function ( callback ) {
-				req = supertest ( url ).post ( "/privacies" );
+				req = supertest ( url, "POST", "/privacies" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "POST /privacies/1", function ( callback ) {
-				req = supertest ( url ).post ( "/privacies/1" );
+				req = supertest ( url, "POST", "/privacies/1" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /privacies", function ( callback ) {
-				req = supertest ( url ).put ( "/privacies" );
+				req = supertest ( url, "PUT", "/privacies" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "PUT /privacies/1", function ( callback ) {
-				req = supertest ( url ).put ( "/privacies/1" );
+				req = supertest ( url, "PUT", "/privacies/1" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /privacies", function ( callback ) {
-				req = supertest ( url ).del ( "/privacies" );
+				req = supertest ( url, "DELETE", "/privacies" );
 				supertest405 ( req, callback );
 			} );
 
 			it ( "DELETE /privacies/1", function ( callback ) {
-				req = supertest ( url ).del ( "/privacies/1" );
+				req = supertest ( url, "DELETE", "/privacies/1" );
 				supertest405 ( req, callback );
 			} );
 
