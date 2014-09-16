@@ -1,4 +1,33 @@
 var uid = require ( "../utils" ).uid;
+var supertest = require ( "supertest" );
+
+module.exports.supertest = function ( host, method, url ) {
+	var req = supertest ( host );
+	switch ( method ) {
+		case "POST": req = req.post ( url ); break;
+		case "PUT": req = req.put ( url ); break;
+		case "DELETE": req = req.del ( url ); break;
+		case "GET":
+		default: req = req.get ( url ); break;
+	}
+	return req.set ( "Content-Type", "application/json" );
+}
+
+module.exports.supertest405 = function ( req, callback ) {
+	req.end ( function ( err, res ) {
+		if ( err ) return callback ( err );
+		res.should.have.status ( 405 );
+		callback ( )
+	} );
+}
+
+module.exports.supertest404 = function ( req, callback ) {
+	req.end ( function ( err, res ) {
+		if ( err ) return callback ( err );
+		res.should.have.status ( 404 );
+		callback ( )
+	} );
+}
 
 module.exports.createDeveloperAccountAndOAuth1Client = function ( nodoovent, callback ) {
 	var models = nodoovent.models;
