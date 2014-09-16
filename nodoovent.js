@@ -32,14 +32,17 @@ module.exports = function ( callback ) {
 	app.set ( "views", __dirname + "/views" );
 	app.set ( "view engine", "ejs" );
 	app.use ( favicon ( path.join ( __dirname, "public", "favicon.png" ) ) );
-	app.use ( bodyParser ( ) );
+	app.use ( bodyParser.json ( ) );
 
-	// development and test only
+	// load specific module for specific environement
 	var errorhandler = null;
 	var morgan = null;
-	if  ( "development" === app.get ( "env" ) || "test" === app.get ( "env" ) ) {
+	if  ( "development" === app.get ( "env" ) ) {
 		errorhandler = require ( "errorhandler" );
 		morgan = require ( "morgan" );
+	}
+	if ( "test" === app.get ( "env" ) ) {
+		errorhandler = require ( "errorhandler" );
 	}
 
 	// development only
@@ -49,7 +52,7 @@ module.exports = function ( callback ) {
 
 	app.use ( methodOverride ( ) );
 	app.use ( cookieParser ( "your secret here" ) );
-	app.use ( session ( { secret: 'nodoovent ninja dev' } ) );
+	app.use ( session ( { secret: "nodoovent ninja dev", resave: true, saveUninitialized: true } ) );
 	app.use ( passport.initialize ( ) );
 	app.use ( passport.session ( ) );
 	app.use ( express.static ( path.join ( __dirname, "public" ) ) );
