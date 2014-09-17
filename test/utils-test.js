@@ -29,6 +29,14 @@ module.exports.supertest404 = function ( req, callback ) {
 	} );
 }
 
+module.exports.supertest401 = function ( req, callback ) {
+	req.end ( function ( err, res ) {
+		if ( err ) return callback ( err );
+		res.should.have.status ( 401 );
+		callback ( )
+	} );
+}
+
 module.exports.createDeveloperAccountAndOAuth1Client = function ( nodoovent, callback ) {
 	var models = nodoovent.models;
 	var account = { organizationName: "Nodoovent", password: "nodoovent", email: "nodoovent@nodoovent.com" };
