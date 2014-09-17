@@ -1,11 +1,13 @@
 var should = require ( "should" );
 var shouldHTTP = require ( "should-http" );
-var supertest = require ( "supertest" );
 var oauth = require ( "oauth" );
 var OAuth = oauth.OAuth;
 
 var UtilsTest = require ( "./utils-test" );
 var addUserAndOAuth1AccessToken = UtilsTest.addUserAndOAuth1AccessToken;
+var supertest = UtilsTest.supertest;
+var supertest405 = UtilsTest.supertest405;
+var supertest401 = UtilsTest.supertest401;
 
 var Utils = require ( "../utils/" );
 var DateHelper = Utils.DateHelper;
@@ -103,39 +105,23 @@ module.exports = function ( nodoovent, url ) {
 					var date = new Date ( new Date ( ).getTime ( ) + 120000 );
 					var dueAt = DateHelper.date2string ( date );
 					var todo = { name: "Find Lost Boys", description: "Find new mates for my Lost Boys", dueAt: dueAt };
-					var req = supertest ( url ).post ( "/todos" ).send ( todo );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "POST", "/todos" ).send ( todo );
+					supertest401 ( req, callback );
 				} );
 
 				it ( "GET /todos return 401", function ( callback ) {
-					var req = supertest ( url ).get ( "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "GET", "/todos" );
+					supertest401 ( req, callback );
 				} );
 
 				it ( "PUT /todos return 405", function ( callback ) {
-					var req = supertest ( url ).put ( "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+					var req = supertest ( url, "PUT", "/todos" );
+					supertest405 ( req, callback );
 				} );
 
 				it ( "DELETE /todos return 405", function ( callback ) {
-					var req = supertest ( url ).del ( "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+					var req = supertest ( url, "DELETE", "/todos" );
+					supertest405 ( req, callback );
 				} );
 
 			} );
@@ -156,7 +142,7 @@ module.exports = function ( nodoovent, url ) {
 					var date = new Date ( new Date ( ).getTime ( ) + 120000 );
 					var dueAt = DateHelper.date2string ( date );
 					var todo = { name: "Find Lost Boys", description: "Find new mates for my Lost Boys", dueAt: dueAt };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -178,7 +164,7 @@ module.exports = function ( nodoovent, url ) {
 					var date = new Date ( new Date ( ).getTime ( ) + 12035269 );
 					var dueAt = DateHelper.date2string ( date );
 					var todo = { name: "Find Lost Boys", description: "A Todo with a name already existed", dueAt: dueAt };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -198,7 +184,7 @@ module.exports = function ( nodoovent, url ) {
 
 				it ( "should create todo without due date", function ( callback ) {
 					var todo = { name: "Find Lost Boys", description: "A Todo with a name already existed" };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -218,7 +204,7 @@ module.exports = function ( nodoovent, url ) {
 
 				it ( "should create todo without description", function ( callback ) {
 					var todo = { name: "Find Lost Boys" };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -238,7 +224,7 @@ module.exports = function ( nodoovent, url ) {
 
 				it ( "should create private todo", function ( callback ) {
 					var todo = { name: "Private todo", description: "a testing private todo", privacy: 2 };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -258,7 +244,7 @@ module.exports = function ( nodoovent, url ) {
 
 				it ( "should create public todo", function ( callback ) {
 					var todo = { name: "Public todo", description: "a testing public todo", privacy: 1 };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 201 );
@@ -280,7 +266,7 @@ module.exports = function ( nodoovent, url ) {
 					var date = new Date ( new Date ( ).getTime ( ) + 12035269 );
 					var dueAt = DateHelper.date2string ( date );
 					var todo = { description: "A Todo with a name already existed", dueAt: dueAt };
-					oauth.post ( url + "/todos", accesstoken, accesssecret, todo, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos", accesstoken, accesssecret, JSON.stringify ( todo ), "application/json", function ( err, data, res ) {
 						if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 						data = JSON.parse ( data );
 						res.should.have.status ( 200 );
@@ -378,7 +364,7 @@ module.exports = function ( nodoovent, url ) {
 				} );
 
 				it ( "PUT /todos return 405", function ( callback ) {
-					oauth.put ( url + "/todos", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.put ( url + "/todos", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
@@ -393,39 +379,23 @@ module.exports = function ( nodoovent, url ) {
 			describe ( "Request /user/:id/todos endpoint without oauth1 authentication", function ( ) {
 
 				it ( "POST /user/:id/todos return 405", function ( callback ) {
-					var req = supertest ( url ).post ( "/user/" + peterpan.id + "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+					var req = supertest ( url, "POST", "/user/" + peterpan.id + "/todos" );
+					supertest405 ( req, callback );
 				} );
 
 				it ( "GET /user/:id/todos return 401", function ( callback ) {
-					var req = supertest ( url ).get ( "/user/" + peterpan.id + "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "GET", "/user/" + peterpan.id + "/todos" );
+					supertest401 ( req, callback );
 				} );
 
 				it ( "PUT /user/:id/todos return 405", function ( callback ) {
-					var req = supertest ( url ).put ( "/user/" + peterpan.id + "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+					var req = supertest ( url, "PUT", "/user/" + peterpan.id + "/todos" );
+					supertest405 ( req, callback );
 				} );
 
 				it ( "DELETE /user/:id/todos return 405", function ( callback ) {
-					var req = supertest ( url ).del ( "/user/" + peterpan.id + "/todos" );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+					var req = supertest ( url, "DELETE", "/user/" + peterpan.id + "/todos" );
+					supertest405 ( req, callback );
 				} );
 
 			} );
@@ -450,14 +420,14 @@ module.exports = function ( nodoovent, url ) {
 				} );
 
 				it ( "PUT /user/:id/todos return 405", function ( callback ) {
-					oauth.put ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.put ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
 				} );
 
 				it ( "POST /user/:id/todos return 405", function ( callback ) {
-					oauth.post ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.post ( url + "/user/" + peterpan.id + "/todos", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
@@ -598,40 +568,24 @@ module.exports = function ( nodoovent, url ) {
 					} );
 				} );
 
-				it ( "POST /user/:id/todos return 405", function ( callback ) {
-					var req = supertest ( url ).post ( "/todos/" + todoId );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 405 );
-						callback ( );
-					} );
+				it ( "POST /todos/:id/ return 405", function ( callback ) {
+					var req = supertest ( url, "POST", "/todos/" + todoId );
+					supertest405 ( req, callback );
 				} );
 
 				it ( "GET /todos/:id return 401", function ( callback ) {
-					var req = supertest ( url ).get ( "/todos/" + todoId );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "GET", "/todos/" + todoId );
+					supertest401 ( req, callback );
 				} );
 
 				it ( "PUT /todos/:id return 401", function ( callback ) {
-					var req = supertest ( url ).put ( "/todos/" +todoId );
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "PUT", "/todos/" +todoId );
+					supertest401 ( req, callback );
 				} );
 
 				it ( "DELETE /todos/:id return 401", function ( callback ) {
-					var req = supertest ( url ).del ( "/todos/" + todoId);
-					req.end ( function ( err, res ) {
-						if ( err ) return callback ( err );
-						res.should.have.status ( 401 );
-						callback ( );
-					} );
+					var req = supertest ( url, "DELETE", "/todos/" + todoId);
+					supertest401 ( req, callback );
 				} );
 
 			} );
@@ -656,7 +610,7 @@ module.exports = function ( nodoovent, url ) {
 				} );
 
 				it ( "POST /todos/:id return 405", function ( callback ) {
-					oauth.post ( url + "/todos/" + todoId, accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.post ( url + "/todos/" + todoId, accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
@@ -796,6 +750,16 @@ module.exports = function ( nodoovent, url ) {
 						testAuthorTodo ( data, { id: otherTodosPublic.author } );
 						callback ( );
 					} );
+				} );
+
+			} );
+
+			describe ( "PUT /todos/:id with oauth1 authentication", function ( ) {
+
+				describe ( "Try to update todos authenticated user aren't owner", function ( ) {
+
+					it ( "Can't update todo auhtenticated user aren't owner" );
+
 				} );
 
 			} );
