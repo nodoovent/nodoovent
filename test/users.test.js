@@ -1,10 +1,13 @@
 var should = require ( "should" );
 var shouldHTTP = require ( "should-http" );
-var supertest = require ( "supertest" );
 var oauth = require ( "oauth" );
 var OAuth = oauth.OAuth;
+
 var UtilsTest = require ( "./utils-test" );
 var addUserAndOAuth1AccessToken = UtilsTest.addUserAndOAuth1AccessToken;
+var supertest = UtilsTest.supertest;
+var supertest405 = UtilsTest.supertest405;
+var supertest401 = UtilsTest.supertest401;
 
 module.exports = function ( nodoovent, url ) {
 
@@ -29,7 +32,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should have POST /user end point and create a new user", function ( callback ) {
 				var user = { firstName: "John", lastName: "Doe", login: "jdoe", email: "john.doe@gmail.com", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( user );
+				var req = supertest ( url, "POST", "/user" ).send ( user );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 201 );
@@ -45,7 +48,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user with existing login", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: sherlock.login, email: "jack.doe@gmail.com", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -58,7 +61,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user with an empty login", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "", email: "jack.doe@gmail.com", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -71,7 +74,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user without a password", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "jack.doe@gmail.com" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -84,7 +87,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user with an empty password", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "jack.doe@gmail.com", password: "" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -97,7 +100,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user without a valid address mail", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "jackgmailcom", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -110,7 +113,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user with an empty address mail", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", email: "", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -123,7 +126,7 @@ module.exports = function ( nodoovent, url ) {
 
 			it ( "should not add user without an address mail", function ( callback ) {
 				var jackDoe = { firstName: "Jack", lastName: "Doe", login: "jackdoe", password: "johndoe" };
-				var req = supertest ( url ).post ( "/user" ).send ( jackDoe );
+				var req = supertest ( url, "POST", "/user" ).send ( jackDoe );
 				req.end ( function ( err, res ) {
 					if ( err ) return callback ( err );
 					res.should.have.status ( 200 );
@@ -139,102 +142,58 @@ module.exports = function ( nodoovent, url ) {
 		describe ( "/user, /users and /users/id need an authentication", function ( ) {
 
 			it ( "should have GET /user return 401 http code", function ( callback ) {
-				var req = supertest ( url ).get ( "/user" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 401 );
-					callback ( );
-				} );
+				var req = supertest ( url, "GET", "/user" ).send ( );
+				supertest401 ( req, callback );
 			} );
 
 			it ( "should have UPDATE /user return 401 http code", function ( callback ) {
-				var req = supertest ( url ).put ( "/user" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 401 );
-					callback ( );
-				} );
+				var req = supertest ( url, "PUT", "/user" ).send ( );
+				supertest401 ( req, callback );
 			} );
 
 			it ( "should have DELETE /user return 401 http code", function ( callback ) {
-				var req = supertest ( url ).del ( "/user" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 401 );
-					callback ( );
-				} );
+				var req = supertest ( url, "DELETE", "/user" ).send ( );
+				supertest401 ( req, callback );
 			} );
 
 			it ( "should have GET /users return 401 http code", function ( callback ) {
-				var req = supertest ( url ).get ( "/users" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 401 );
-					callback ( );
-				} );
+				var req = supertest ( url, "GET", "/users" ).send ( );
+				supertest401 ( req, callback );
 			} );
 
 			it ( "should have POST /users return 405 http code", function ( callback ) {
-				var req = supertest ( url ).post ( "/users" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "POST", "/users" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "should have PUT /users return 405 http code", function ( callback ) {
-				var req = supertest ( url ).put ( "/users" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "PUT", "/users" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "should have DELETE /users return 405 http code", function ( callback ) {
-				var req = supertest ( url ).del ( "/users" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "DELETE", "/users" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "should have GET /users/1 return 401 http code", function ( callback ) {
-				var req = supertest ( url ).get ( "/users/1" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 401 );
-					callback ( );
-				} );
+				var req = supertest ( url, "GET", "/users/1" ).send ( );
+				supertest401 ( req, callback );
 			} );
 
 			it ( "should have POST /users/1 return 405 http code", function ( callback ) {
-				var req = supertest ( url ).post ( "/users/1" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "POST", "/users/1" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "should have PUT /users/1 return 405 http code", function ( callback ) {
-				var req = supertest ( url ).put ( "/users/1" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "PUT", "/users/1" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 			it ( "should have DELETE /users/1 return 405 http code", function ( callback ) {
-				var req = supertest ( url ).del ( "/users/1" ).send ( );
-				req.end ( function ( err, res ) {
-					if ( err ) return callback ( err );
-					res.should.have.status ( 405 );
-					callback ( );
-				} );
+				var req = supertest ( url, "DELETE", "/users/1" ).send ( );
+				supertest405 ( req, callback );
 			} );
 
 		} );
@@ -286,7 +245,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName", function ( callback ) {
 						var user = { firstName: "John" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -302,7 +261,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's lastName", function ( callback ) {
 						var user = { lastName: "Watson" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -318,7 +277,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's email", function ( callback ) {
 						var user = { email: "john.watson@backerstreet.com" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -334,7 +293,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's password", function ( callback ) {
 						var user = { password: "mary!" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -350,7 +309,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName and lastName", function ( callback ) {
 						var user = { firstName: "Sherlock", lastName: "Holmes" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -366,7 +325,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName and email", function ( callback ) {
 						var user = { firstName: "Mycroft", email: "mycroft.holmes@servicesecret.uk" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -382,7 +341,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName and password", function ( callback ) {
 						var user = { firstName: "Sherlock", password: "adler" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -398,7 +357,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's lastName and email", function ( callback ) {
 						var user = { lastName: "Moriarty", email: "sherlock.holmes@bakerstreet.com" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -414,7 +373,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's lastName and password", function ( callback ) {
 						var user = { lastName: "Holmes", password: "irene" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -430,7 +389,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's email and password", function ( callback ) {
 						var user = { email: "sherlock.holmes@21bbakerstreet.com", password: "elementary" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -446,7 +405,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName, lastName and email", function ( callback ) {
 						var user = { email: "irene.adler@21bbakerstreet.com", firstName: "Irene", lastName: "Adler" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -462,7 +421,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName, lastName and password", function ( callback ) {
 						var user = { password: "johny", firstName: "Mary", lastName: "Morstan" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -478,7 +437,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's email, lastName and password", function ( callback ) {
 						var user = { password: "watsy", email: "mary.watson@backerstreet.com", lastName: "Watson" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -494,7 +453,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should have PUT /user end point and update the user's firstName, lastName, email and password", function ( callback ) {
 						var user = { password: "irene", email: "sherlock@21bbakerstreet.com", lastName: "Holmes", firstName: "Sherlock" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							res.should.be.json;
@@ -514,7 +473,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should not update user with an empty password", function ( callback ) {
 						var user = { password: "" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							data = JSON.parse ( data );
@@ -526,7 +485,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should not update user with an empty address mail", function ( callback ) {
 						var user = { email: "" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							data = JSON.parse ( data );
@@ -538,7 +497,7 @@ module.exports = function ( nodoovent, url ) {
 
 					it ( "should not update user with a not valid address mail", function ( callback ) {
 						var user = { email: "sdfshqh5654rfq6z4gqfg5" };
-						oauth.put ( url + "/user", accesstoken, accesssecret, user, null, function ( err, data, res ) {
+						oauth.put ( url + "/user", accesstoken, accesssecret, JSON.stringify ( user ), "application/json", function ( err, data, res ) {
 							if ( err ) return callback ( new Error ( "[" + err.statusCode + "] " + err.data ) );
 							res.should.have.status ( 200 );
 							data = JSON.parse ( data );
@@ -648,14 +607,14 @@ module.exports = function ( nodoovent, url ) {
 			describe ( "POST, PUT and DELETE /users and /users/:id with oauth1 authentication", function ( ) {
 
 				it ( "POST /users end point with oauth1 authentication should return 405 http code", function ( callback ) {
-					oauth.post ( url + "/users", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.post ( url + "/users", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
 				} );
 
 				it ( "PUT /users end point with oauth1 authentication should return 405 http code", function ( callback ) {
-					oauth.put ( url + "/users", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.put ( url + "/users", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
@@ -669,14 +628,14 @@ module.exports = function ( nodoovent, url ) {
 				} );
 
 				it ( "POST /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
-					oauth.post ( url + "/users/1", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.post ( url + "/users/1", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
 				} );
 
 				it ( "PUT /users/1 end point with oauth1 authentication should return 405 http code", function ( callback ) {
-					oauth.put ( url + "/users/1", accesstoken, accesssecret, null, null, function ( err, data, res ) {
+					oauth.put ( url + "/users/1", accesstoken, accesssecret, "", "application/json", function ( err, data, res ) {
 						res.should.have.status ( 405 );
 						callback ( );
 					} );
