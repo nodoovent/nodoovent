@@ -78,16 +78,20 @@ module.exports = function ( models, auth ) {
 
 			// do not have id to update
 			delete todo.id;
-
 			if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
 			if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
 			if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
 			if ( req.param ( "status" ) ) todo.status = req.param ( "status" );
 			if ( req.param ( "privacy" ) ) todo.privacy = req.param ( "privacy" );
 
-			Todos.update ( { id: req.param ( "id" ) }, function ( err, todo ) {
+			Todos.update ( { id: req.param ( "id" ) }, todo, function ( err, todos ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
-				res.send ( todo );
+				if ( todos.length != 1 ) return res.senf ( { result: "error", error: "Todo id " + req.param ( "id" ) + " not exist." } );
+				var todo = todos[0];
+				Todos.findOne ( todos[0].id ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
+					if ( err ) return res.send ( { result: "error", error: err } );
+					res.send ( todo );
+				} );
 			} );
 		} );
 	};
