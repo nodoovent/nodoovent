@@ -80,7 +80,7 @@ module.exports = function ( models, auth ) {
 			delete todo.id;
 			if ( req.param ( "name" ) ) todo.name = req.param ( "name" );
 			if ( req.param ( "description" ) ) todo.description = req.param ( "description" );
-			if ( req.param ( "dueDate" ) ) todo.dueDate = req.param ( "dueDate" );
+			if ( req.param ( "dueAt" ) ) todo.dueAt = req.param ( "dueAt" );
 			if ( req.param ( "status" ) ) todo.status = req.param ( "status" );
 			if ( req.param ( "privacy" ) ) todo.privacy = req.param ( "privacy" );
 
