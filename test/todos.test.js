@@ -758,7 +758,78 @@ module.exports = function ( nodoovent, url ) {
 
 				describe ( "Try to update todos authenticated user aren't owner", function ( ) {
 
-					it ( "Can't update todo auhtenticated user aren't owner" );
+					var oauth = null;
+					var accesstoken = "";
+					var accesssecret = "";
+
+					var Todos = nodoovent.models.todos;
+
+					var dueAtTodo = null;
+
+					before ( function ( callback ) {
+						oauth = new OAuth ( url + "/oauth1/requestToken", url + "/oauth1/accessToken",  oauth1client.consumerKey, oauth1client.consumerSecret, "1.0", "", "HMAC-SHA1" );
+						accesstoken = oauth1accesstoken.token;
+						accesssecret = oauth1accesstoken.secret;
+
+						Todos.findOne ( ).where ( { dueAt: null, author: peterpan.id } ).exec ( function ( err, todo ) {
+							if ( err ) callback ( new Error ( err ) );
+							dueAtTodo = todo;
+							callback ( );
+						} );
+					} );
+
+					it ( "Can't update todo auhtenticated user aren't owner", function ( callback ) {
+						Todos.findOne ( ).where ( { author: { "!": peterpan.id } } ).exec ( function ( err, todo ) {
+							if ( err ) callback ( err );
+							oauth.put ( url + "/todos/" + todo.id, accesstoken, accesssecret, null, "application/json", function ( err, data, res ) {
+								res.should.have.status ( 403 );
+								callback ( );
+							} );
+						} );
+					} );
+
+					it ( "Can update todo name", function ( callback ) {
+						Todos.findOne ( ).where ( { author: peterpan.id } ).exec ( function ( err, todo ) {
+							if ( err ) callback ( err );
+							var upd = { name: "read pulp fiction" };
+							oauth.put ( url + "/todos/" + todo.id, accesstoken, accesssecret, JSON.stringify ( upd ), "application/json", function ( err, data, res ) {
+								res.should.have.status ( 200 );
+								res.should.be.json;
+								data = JSON.parse ( data );
+								data.should.be.an.Object;
+								data.should.have.property ( "id", todo.id );
+								data.should.have.property ( "name", upd.name );
+								data.should.have.property ( "description", todo.description );
+								data.should.have.property ( "dueAt", DateHelper.date2string ( todo.dueAt ) );
+								data.should.have.property ( "createdAt", DateHelper.date2string ( todo.createdAt ) );
+								data.should.have.property ( "updatedAt" );
+								testPrivacyTodo ( data, { id: todo.privacy } );
+								testStatusTodo ( data, { id: todo.status } );
+								testAuthorTodo ( data, { id: todo.author } );
+								callback ( );
+							} ) ;
+						} );
+					} );
+
+					it ( "Can add dueAt date to existing todo", function ( callback ) {
+						var upd = { dueAt: DateHelper.date2string ( new Date ( ) ) };
+						oauth.put ( url + "/todos/" + dueAtTodo.id, accesstoken, accesssecret, JSON.stringify ( upd ), "application/json", function ( err, data, res ) {
+							res.should.have.status ( 200 );
+							res.should.be.json;
+							data = JSON.parse ( data );
+							data.should.be.an.Object;
+							data.should.have.property ( "id", dueAtTodo.id );
+							data.should.have.property ( "name", dueAtTodo.name );
+							data.should.have.property ( "description", dueAtTodo.description );
+							data.should.have.property ( "dueAt", upd.dueAt );
+							data.should.have.property ( "createdAt", DateHelper.date2string ( dueAtTodo.createdAt ) );
+							data.should.have.property ( "updatedAt" );
+							testPrivacyTodo ( data, { id: dueAtTodo.privacy } );
+							testStatusTodo ( data, { id: dueAtTodo.status } );
+							testAuthorTodo ( data, { id: dueAtTodo.author } );
+							callback ( );
+						} );
+					} )
 
 				} );
 
