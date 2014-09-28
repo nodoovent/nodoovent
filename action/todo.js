@@ -59,7 +59,7 @@ module.exports = function ( models, auth ) {
 	};
 
 	self.delete = function ( req, res ) {
-		todos.findOne ( req.param ( "id" ) ).exec ( function ( err, todo ) {
+		Todos.findOne ( req.param ( "id" ) ).exec ( function ( err, todo ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
 			if ( !todo ) return res.status ( 404 ).send ( );
 			if ( todo.author != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
