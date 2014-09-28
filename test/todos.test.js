@@ -50,34 +50,10 @@ module.exports = function ( nodoovent, url ) {
 	}
 
 	var testAuthorTodo = function ( data, author ) {
-		data.should.have.property ( "author" );
-		if ( typeof author != "undefined" && author != null ) {
-			if ( typeof author.id != "undefined" && author.id != null )
-				data.author.should.have.property ( "id", author.id );
-			else data.author.should.have.property ( "id" );
-
-			if ( typeof author.login != "undefined" && author.login != null )
-				data.author.should.have.property ( "login", author.login );
-			else data.author.should.have.property ( "login" );
-
-			if ( typeof author.firstName != "undefined" && author.firstName != null )
-				data.author.should.have.property ( "firstName", author.firstName );
-			else data.author.should.have.property ( "firstName" );
-
-			if ( typeof author.lastName != "undefined" && author.lastName != null )
-				data.author.should.have.property ( "lastName", author.lastName );
-			else data.author.should.have.property ( "lastName" );
-
-			if ( typeof author.email != "undefined" && author.email != null )
-				data.author.should.have.property ( "email", author.email );
-			else data.author.should.have.property ( "email" );
-		} else {
-			data.author.should.have.property ( "id" );
-			data.author.should.have.property ( "login" );
-			data.author.should.have.property ( "firstName" );
-			data.author.should.have.property ( "lastName" );
-			data.author.should.have.property ( "email" );
-		}
+		if ( arguments.length == 2 )
+			data.should.have.property ( "author", author.id );
+		if ( arguments.length == 1 )
+			data.should.have.property ( "author" );
 	}
 
 	describe ( "Test /todos, /user/:userid/todos and /todos/:id end points:", function ( ) {
@@ -336,7 +312,7 @@ module.exports = function ( nodoovent, url ) {
 							testPrivacyTodo ( data[i] );
 							testStatusTodo ( data[i] );
 							testAuthorTodo ( data[i] );
-							if ( data[i].author.id != peterpan.id ) data[i].privacy.id.should.be.equal ( 1 );
+							if ( data[i].author != peterpan.id ) data[i].privacy.id.should.be.equal ( 1 );
 						}
 						callback ( );
 					} )

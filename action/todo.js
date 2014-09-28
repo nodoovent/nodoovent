@@ -25,7 +25,7 @@ module.exports = function ( models, auth ) {
 		// create the todo
 		Todos.create ( todo, function ( err, todo ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
-			Todos.findOne ( todo.id ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
+			Todos.findOne ( todo.id ).populate ( "privacy" ).populate ( "status" ).exec ( function ( err, todo ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				res.status ( 201 ).send ( todo );
 			} );
@@ -42,7 +42,7 @@ module.exports = function ( models, auth ) {
 			var where = { author: userid };
 			if ( userid != req.user.id )
 				where.privacy = 1; // add conf.privacies Public id ???
-			Todos.find ( ).where ( where ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todos ) {
+			Todos.find ( ).where ( where ).populate ( "privacy" ).populate ( "status" ).exec ( function ( err, todos ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				res.send ( todos );
 			} );
@@ -50,10 +50,10 @@ module.exports = function ( models, auth ) {
 	};
 
 	self.getById = function ( req, res ) {
-		Todos.findOne ( req.param ( "id" ) ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
+		Todos.findOne ( req.param ( "id" ) ).populate ( "privacy" ).populate ( "status" ).exec ( function ( err, todo ) {
 			if ( err ) return res.send ( { result: "error", error: err } );
 			if ( !todo ) return res.status ( 404 ).send ( );
-			if ( todo.privacy.id == 2 && todo.author.id != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
+			if ( todo.privacy.id == 2 && todo.author != req.user.id ) return res.status ( 403 ).send ( { result: "error", error: "You're not authorize to read this todo" } );
 			res.send ( todo );
 		} );
 	};
@@ -88,7 +88,7 @@ module.exports = function ( models, auth ) {
 				if ( err ) return res.send ( { result: "error", error: err } );
 				if ( todos.length != 1 ) return res.senf ( { result: "error", error: "Todo id " + req.param ( "id" ) + " not exist." } );
 				var todo = todos[0];
-				Todos.findOne ( todos[0].id ).populate ( "privacy" ).populate ( "status" ).populate ( "author" ).exec ( function ( err, todo ) {
+				Todos.findOne ( todos[0].id ).populate ( "privacy" ).populate ( "status" ).exec ( function ( err, todo ) {
 					if ( err ) return res.send ( { result: "error", error: err } );
 					res.send ( todo );
 				} );
@@ -98,10 +98,10 @@ module.exports = function ( models, auth ) {
 
 	self.list = function ( req, res ) {
 		Todos.find ( ).where ( { or: [ { privacy: 1 }, { author: req.user.id } ] } ).populate ( "privacy" )
-		.populate ( "status" ).populate ( "author" ).exec ( function ( err, todos ) {
-			if ( err ) return res.send ( { result: "error", error: err } );
-			res.send ( todos );
-		} );
+			.populate ( "status" ).exec ( function ( err, todos ) {
+				if ( err ) return res.send ( { result: "error", error: err } );
+				res.send ( todos );
+			} );
 	}
 
 }
